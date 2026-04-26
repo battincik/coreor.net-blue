@@ -1,3 +1,5 @@
+"use client"
+
 import { Zap, Code as Code2, Briefcase, X, Mail } from "lucide-react"
 import { useNav, type Page } from "@/lib/navigation"
 import { Separator } from "@/components/ui/separator"
