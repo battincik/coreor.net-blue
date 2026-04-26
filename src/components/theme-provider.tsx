@@ -1,3 +1,5 @@
+"use client"
+
 /* eslint-disable react-refresh/only-export-components */
 import * as React from "react"
 
@@ -84,14 +86,18 @@ export function ThemeProvider({
   disableTransitionOnChange = true,
   ...props
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = React.useState<Theme>(() => {
-    const storedTheme = localStorage.getItem(storageKey)
-    if (isTheme(storedTheme)) {
-      return storedTheme
+  const [theme, setThemeState] = React.useState<Theme>(defaultTheme)
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") {
+      return
     }
 
-    return defaultTheme
-  })
+    const storedTheme = localStorage.getItem(storageKey)
+    if (isTheme(storedTheme)) {
+      setThemeState(storedTheme)
+    }
+  }, [storageKey])
 
   const setTheme = React.useCallback(
     (nextTheme: Theme) => {
