@@ -105,9 +105,9 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-4">Get in Touch</h3>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <p>Istanbul, Turkey</p>
+              <p>Ankara, Türkiye</p>
               <p>hello@coreor.net</p>
-              <p>+90 (212) 000-0000</p>
+              <p>+90 (312) 911-4815</p>
             </div>
             <div className="mt-5 p-3 rounded-lg border border-primary/20 bg-primary/5">
               <p className="text-xs text-muted-foreground mb-1">System Status</p>

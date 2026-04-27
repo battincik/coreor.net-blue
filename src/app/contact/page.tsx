@@ -1,6 +1,6 @@
 "use client"
 
-import { ContactPage } from "@/pages/ContactPage"
+import { ContactPage } from "@/components/pages/ContactPage"
 
 export default function Page() {
   return <ContactPage />
