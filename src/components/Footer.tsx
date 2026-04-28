@@ -1,6 +1,7 @@
 "use client"
 
 import { Zap, Code as Code2, Briefcase, X, Mail } from "lucide-react"
+import Link from "next/link"
 import { useNav, type Page } from "@/lib/navigation"
 import { Separator } from "@/components/ui/separator"
 
@@ -20,7 +21,11 @@ const company: { label: string; page: Page }[] = [
   { label: "Contact", page: "contact" },
 ]
 
-const legal = ["Privacy Policy", "Terms of Service", "Cookie Policy"]
+const legal = [
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms-of-service" },
+  { label: "Cookie Policy", href: "/cookie-policy" },
+]
 
 export function Footer() {
   const { navigate } = useNav()
@@ -126,10 +131,10 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Coreor.net — All rights reserved.
           </p>
           <div className="flex gap-5">
-            {legal.map((item) => (
-              <a key={item} href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                {item}
-              </a>
+            {legal.map(({ label, href }) => (
+              <Link key={label} href={href} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                {label}
+              </Link>
             ))}
           </div>
         </div>
