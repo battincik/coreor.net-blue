@@ -389,7 +389,7 @@ export default function AboutPage() {
             </section>
 
             {/* Team */}
-            <section className="py-24 relative">
+            {/* <section className="py-24 relative">
                 <div className="absolute inset-0 grid-bg opacity-40" />
                 <div className="relative max-w-6xl mx-auto px-6">
                     <RevealSection className="text-center mb-14">
@@ -441,7 +441,7 @@ export default function AboutPage() {
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* Tech stack */}
             <section className="py-20 bg-card/20 border-t border-border/30">
