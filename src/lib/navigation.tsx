@@ -32,7 +32,7 @@ export function useNav(): NavContextType {
   const currentPage = PATH_TO_PAGE[pathname] ?? "home"
 
   const navigate = (page: Page) => {
-    router.push(PAGE_TO_PATH[page])
+    router.push(PAGE_TO_PATH[page] as any)
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
