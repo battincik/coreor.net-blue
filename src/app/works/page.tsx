@@ -61,7 +61,7 @@ const projects = [
         color: "from-sky-500/20 to-blue-500/10",
     },
     {
-        title: "Fleet Management & Rental Analytics Platform",
+        title: "Fleet Management Platform",
         category: "AI" as Category,
         tags: ["Python", "React Native", "GraphQL", "ML", "Microservices"],
         desc: "An end-to-end fleet management and analytics platform built for vehicle rental companies. The system provides real-time vehicle tracking, fuel consumption monitoring, predictive maintenance, customer management, and integrated payment workflows. Advanced machine learning models analyze vehicle usage patterns and predict potential failures, while analytics dashboards deliver actionable insights to optimize operations and reduce costs.",
@@ -193,22 +193,20 @@ export default function WorksPage() {
                                         className={`h-28 bg-gradient-to-br ${p.color} relative flex items-end p-5`}
                                     >
                                         <div className="absolute inset-0 grid-bg opacity-40" />
-                                        <div className="relative">
+                                    </div>
+
+                                    <div className="p-6 flex flex-col flex-1">
+                                        <h3 className="text-xl font-bold text-foreground mb-3">
+                                            {p.title}
                                             <Badge
                                                 variant="outline"
-                                                className="text-xs border-border/60 bg-card/40 text-foreground/80 mb-1"
+                                                className="text-xs border-border/60 bg-card/40 text-foreground/80 mb-1 ml-2"
                                             >
                                                 {p.category}
                                             </Badge>
                                             <div className="text-xs text-muted-foreground">
                                                 {p.year}
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6 flex flex-col flex-1">
-                                        <h3 className="text-xl font-bold text-foreground mb-3">
-                                            {p.title}
                                         </h3>
                                         <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">
                                             {p.desc}
@@ -245,16 +243,9 @@ export default function WorksPage() {
                                         </div>
 
                                         <div className="flex gap-2 mt-5">
-                                            <button className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors">
-                                                <ExternalLink className="w-3.5 h-3.5" />{" "}
-                                                Case Study
-                                            </button>
-                                            <span className="text-border">
-                                                |
-                                            </span>
                                             <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
                                                 <Code2 className="w-3.5 h-3.5" />{" "}
-                                                Code
+                                                Coreor.net - Development Partner
                                             </button>
                                         </div>
                                     </div>
