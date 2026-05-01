@@ -1,0 +1,77 @@
+---
+title: "Building Resilient APIs: Practical Patterns"
+date: "2026-03-10"
+author: "Zeynep Yilmaz"
+tags: ["API", "Architecture", "Backend"]
+excerpt: "Designing APIs that stay reliable under load and failure conditions."
+---
+
+import { Badge } from '@/components/ui/badge'
+
+# Building Resilient APIs: Practical Patterns
+
+Resilient APIs are a combination of careful design, operational readiness and
+continuous testing. This article covers pragmatic patterns you can apply when
+building HTTP and RPC services that remain available and correct when
+components fail.
+
+## 1. Architectural Principles
+
+- **Fail early, fail clearly**: Detect and surface failures at service
+  boundaries rather than masking them.
+- **Design for idempotency**: Allow safe retries for critical operations.
+- **Partition and isolate**: Avoid cascading failures by partitioning
+  responsibilities and maintaining clear resource quotas.
+
+## 2. Timeouts and Retries
+
+Use conservative timeouts and jittered exponential backoff for retries.
+
+```text
+Client -> timeout 2s -> Retry 3 times with backoff (200ms, 600ms, 1.8s)
+```
+
+Prefer idempotent endpoints for automatic retries (e.g., GET, PUT with
+idempotency keys). For non-idempotent operations, implement idempotency tokens
+on the server.
+
+## 3. Circuit Breakers & Bulkheads
+
+Circuit breakers prevent retry storms from destabilizing downstream systems.
+Bulkheads isolate resources so one slow dependency cannot exhaust capacity for
+all requests.
+
+Practical setup:
+
+- Per-host circuit breakers with sliding windows
+- Bulkhead thread/worker pools per integration
+
+## 4. Observability and SLOs
+
+Define SLOs (e.g., 99.9% success within 500ms) and emit traces, metrics and
+logs to measure them. Instrument request latencies, error rates, and
+saturation (CPU, queue sizes).
+
+Key signals:
+
+- p50/p95/p99 latencies
+- error rate per endpoint
+- queue depth and concurrency
+
+## 5. Graceful Degradation
+
+Provide degraded experiences when dependencies fail: cached responses, stale
+data with warnings, or reduced fidelity features.
+
+## 6. Testing for Failure
+
+Chaos testing, dependency fault injection, and long-running soak tests reveal
+failure modes early. Automate failure injection in staging and run canary
+deployments.
+
+## Summary
+
+Resilience is not a single library — it's a discipline combining API design,
+operations, and continuous validation.
+
+<Badge variant="outline">Practical</Badge>

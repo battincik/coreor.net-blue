@@ -5,7 +5,19 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { supabase, type JobPosition } from "@/lib/supabase"
+
+export type JobPosition = {
+  id: string
+  title: string
+  department: string
+  location: string
+  type: string
+  salary_range: string | null
+  description: string
+  requirements: string[]
+  is_active: boolean
+  created_at: string
+}
 
 const benefits = [
   { icon: Zap, title: "Competitive Salary", desc: "Top-of-market compensation with transparent salary bands and annual reviews." },

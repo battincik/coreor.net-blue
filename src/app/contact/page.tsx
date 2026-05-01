@@ -1,5 +1,6 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { Mail, Phone, MapPin, Clock, Send, CircleCheck as CheckCircle, Loader as Loader2, MessageSquare, ChevronDown, ChevronUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -92,6 +93,15 @@ export default function ContactPage() {
     if (errors[k]) setErrors(prev => ({ ...prev, [k]: "" }))
   }
 
+  function SubjectPrefill({ onSet }: { onSet: (k: keyof ContactForm, v: string) => void }) {
+    const search = useSearchParams()
+    useEffect(() => {
+      const subject = search?.get("subject")
+      if (subject) onSet("subject", subject)
+    }, [search, onSet])
+    return null
+  }
+
   const validate = () => {
     const e: Partial<ContactForm> = {}
     if (!form.name.trim()) e.name = "Required"
@@ -144,8 +154,8 @@ export default function ContactPage() {
               <RevealSection key={item.label} delay={i * 70}>
                 <div className="glow-card rounded-xl p-5 bg-card flex gap-4 items-start">
                   <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                    <item.icon className="w-4 h-4 text-primary" />
-                  </div>
+                      {(() => { const Icon = item.icon; return <Icon className="w-4 h-4 text-primary" /> })()}
+                    </div>
                   <div>
                     <div className="text-xs text-muted-foreground mb-0.5">{item.label}</div>
                     <div className="text-sm font-medium text-foreground">{item.value}</div>
@@ -169,6 +179,9 @@ export default function ContactPage() {
                 <MessageSquare className="w-5 h-5 text-primary" />
                 <h2 className="text-xl font-bold text-foreground">Send a Message</h2>
               </div>
+                  <Suspense fallback={null}>
+                    <SubjectPrefill onSet={set} />
+                  </Suspense>
 
               {submitted ? (
                 <div className="text-center py-12">

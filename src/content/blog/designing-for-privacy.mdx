@@ -1,0 +1,39 @@
+---
+title: "Designing for Privacy: Principles and Practices"
+date: "2025-06-15"
+author: "Irem Koc"
+tags: ["Privacy", "Product"]
+excerpt: "Product-level privacy decisions that balance UX and compliance."
+---
+
+# Designing for Privacy: Principles and Practices
+
+Privacy-by-design is about embedding privacy considerations throughout the
+product lifecycle — from discovery to deprecation. This article gives concrete
+examples and guidance for teams building data-driven features.
+
+## Minimise data collection
+
+Collect only what you need. Prefer derived or aggregated signals over raw PII.
+
+## Consent and transparency
+
+Make consent flows clear and scoped. Provide easy-to-find privacy settings and
+explain what the data is used for in plain language.
+
+## Data retention and access controls
+
+Define retention windows and automate deletion. Use RBAC and least privilege
+for access to production data.
+
+## Practical steps for engineers
+
+- Pseudonymize identifiers where possible
+- Log less: avoid storing raw PII in logs
+- Encrypt sensitive data at rest and in transit
+
+## Compliance and audits
+
+Work with legal to map product features to compliance requirements (e.g.,
+GDPR). Maintain an audit trail of data access and processing decisions.
+

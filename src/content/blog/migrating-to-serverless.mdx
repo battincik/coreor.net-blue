@@ -1,0 +1,43 @@
+---
+title: "Migrating to Serverless: When and How"
+date: "2025-11-04"
+author: "Can Demir"
+tags: ["Cloud", "Serverless"]
+excerpt: "A pragmatic guide to deciding whether serverless suits your workload."
+---
+
+# Migrating to Serverless: When and How
+
+Serverless can dramatically reduce operational overhead, but it also brings
+trade-offs. This guide explains the migration shape, common pitfalls, and a
+practical step-by-step approach.
+
+## When to choose serverless
+
+- Bursty traffic with unpredictable spikes
+- Event-driven architectures and short-lived tasks
+- Teams that prefer minimal infra management
+
+## Key concerns
+
+- Cold start behavior and latency
+- Observability and distributed tracing
+- Vendor APIs and potential lock-in
+
+## Migration checklist
+
+1. Identify candidate components (background jobs, event handlers)
+2. Move stateless pieces first and ensure idempotency
+3. Add observability and metrics before switching production traffic
+4. Perform cost modeling and set budgets
+
+## Architectural patterns
+
+- Use durable queues for retries and ordering
+- Separate control-plane from data-plane concerns
+
+## Rollout strategy
+
+Start with a shadow deployment and route a small percentage of traffic to the
+serverless component while you verify behavior and costs.
+

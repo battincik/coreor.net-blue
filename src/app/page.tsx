@@ -490,7 +490,7 @@ export default function HomePage() {
                             >
                                 <div className="flex gap-4 p-6 rounded-xl glow-card bg-card h-full">
                                     <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <item.icon className="w-4 h-4 text-primary" />
+                                        {(() => { const Icon = item.icon; return <Icon className="w-4 h-4 text-primary" /> })()}
                                     </div>
 
                                     <div className="flex flex-col justify-between h-full">

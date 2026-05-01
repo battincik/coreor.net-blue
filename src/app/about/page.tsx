@@ -15,34 +15,29 @@ import { useNav } from "@/lib/navigation";
 
 const milestones = [
     {
-        year: "2019",
-        title: "Foundation",
-        desc: "Coreor was founded in Ankara with a team of 3 engineers passionate about building exceptional software.",
-    },
-    {
-        year: "2020",
-        title: "First Enterprise Client",
-        desc: "Landed our first major enterprise contract, building a payment processing system for a regional bank.",
-    },
-    {
-        year: "2021",
-        title: "Cloud Division Launched",
-        desc: "Expanded into cloud infrastructure services, helping clients migrate legacy systems to modern platforms.",
-    },
-    {
         year: "2022",
-        title: "50 Clients Milestone",
-        desc: "Grew to serve 50+ active clients across 8 countries, with a team of 25 engineers and designers.",
+        title: "Foundation",
+        desc: "Coreor was founded in Ankara with a team of 2 engineers passionate about building exceptional software.",
     },
     {
         year: "2023",
-        title: "AI Integration Practice",
-        desc: "Established a dedicated AI/ML integration team to bring intelligent automation to our client products.",
+        title: "First Enterprise Client",
+        desc: "Delivered custom ERP and CRM solutions for our first enterprise client, helping them manage and streamline their company operations.",
     },
     {
         year: "2024",
-        title: "Global Expansion",
-        desc: "Opened partnerships in Germany and UAE, establishing Coreor as a truly international software company.",
+        title: "Infrastructure & Data Services Expansion",
+        desc: "Transitioned to our own server infrastructure to deliver uninterrupted service, and introduced additional solutions in database management and data operations.",
+    },
+    {
+        year: "2025",
+        title: "International Growth Milestone",
+        desc: "Reached 25+ clients across 3 countries and expanded our team network with part-time developers and designers.",
+    },
+    {
+        year: "2026",
+        title: "Global SaaS & Enterprise Solutions",
+        desc: "Entered a new phase of global growth by launching our own products and investments, offering fully customizable ERP, e-commerce, and CRM solutions for enterprise companies worldwide.",
     },
 ];
 
@@ -372,7 +367,12 @@ export default function AboutPage() {
                                 <div className="glow-card rounded-xl p-6 bg-card text-center h-full flex flex-col justify-between">
                                     <div>
                                         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                                            <v.icon className="w-5 h-5 text-primary" />
+                                            {(() => {
+                                                const Icon = v.icon;
+                                                return (
+                                                    <Icon className="w-5 h-5 text-primary" />
+                                                );
+                                            })()}
                                         </div>
                                         <h3 className="font-semibold text-foreground mb-2">
                                             {v.title}

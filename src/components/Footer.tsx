@@ -73,16 +73,13 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-4">Services</h3>
             <ul className="space-y-2.5">
-              {services.map((s) => (
-                <li key={s}>
-                  <button
-                    onClick={() => navigate("works")}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors text-left"
-                  >
-                    {s}
-                  </button>
-                </li>
-              ))}
+                {services.map((s) => (
+                  <li key={s}>
+                    <Link href={`/services/${encodeURIComponent(s.toLowerCase().replace(/\s+/g, "-") )}`} className="text-sm text-muted-foreground hover:text-primary transition-colors text-left">
+                      {s}
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
 
@@ -101,7 +98,7 @@ export function Footer() {
                 </li>
               ))}
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</a>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
               </li>
             </ul>
           </div>
