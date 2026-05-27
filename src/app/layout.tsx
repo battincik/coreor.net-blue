@@ -7,6 +7,8 @@ import { Analytics } from "@/components/analytics"
 import { buildSiteMetadata, buildWebsiteJsonLd, organizationJsonLd } from "@/lib/seo"
 import { SiteShell } from "@/components/site-shell"
 
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 export const metadata: Metadata = buildSiteMetadata({
   title: "Coreor.net",
   description:
@@ -55,6 +57,7 @@ gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname });
             <Analytics />
           </Suspense>
           <SiteShell>{children}</SiteShell>
+          <SpeedInsights />
         </Providers>
       </body>
     </html>
