@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
 import Script from "next/script"
+import { Suspense } from "react"
 import "@/index.css"
 import { Providers } from "@/components/providers"
-import { Navbar } from "@/components/Navbar"
-import { Footer } from "@/components/Footer"
 import { Analytics } from "@/components/analytics"
 import { buildSiteMetadata, organizationJsonLd } from "@/lib/seo"
+import { SiteShell } from "@/components/site-shell"
 
 export const metadata: Metadata = buildSiteMetadata({
   title: "Coreor.net",
@@ -47,12 +47,10 @@ gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname });
           {JSON.stringify(organizationJsonLd)}
         </Script>
         <Providers>
-          <Analytics />
-          <div className="min-h-screen bg-background text-foreground flex flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <Suspense fallback={null}>
+            <Analytics />
+          </Suspense>
+          <SiteShell>{children}</SiteShell>
         </Providers>
       </body>
     </html>

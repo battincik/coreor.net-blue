@@ -21,7 +21,7 @@ export type JobPosition = {
 
 const benefits = [
   { icon: Zap, title: "Competitive Salary", desc: "Top-of-market compensation with transparent salary bands and annual reviews." },
-  { icon: Users, title: "Remote-First Culture", desc: "Work from anywhere in the world. We have teammates in 8 countries." },
+  { icon: Users, title: "Remote-First Culture", desc: "Work from anywhere in the world. We have teammates in 3 countries." },
   { icon: Heart, title: "Health Coverage", desc: "Full private health insurance for you and your family." },
   { icon: TrendingUp, title: "Growth Budget", desc: "$2,000/year for conferences, courses, books, and professional development." },
   { icon: CheckCircle, title: "Home Office Setup", desc: "$1,500 one-time stipend to build your perfect workspace." },
@@ -455,8 +455,8 @@ useEffect(() => {
             <RevealSection delay={100}>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { label: "Team Size", value: "30+" },
-                  { label: "Countries", value: "8" },
+                  { label: "Team Size", value: "7+" },
+                  { label: "Countries", value: "3" },
                   { label: "Avg Tenure", value: "2.8 yrs" },
                   { label: "Open Roles", value: String(positions.length) },
                 ].map((stat) => (

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, Zap } from "lucide-react"
+import Image from "next/image"
+import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNav, type Page } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
@@ -47,14 +48,25 @@ export function Navbar() {
           <div className="relative w-8 h-8">
             <div className="absolute inset-0 rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-primary" />
+              <Image
+                src="/favicon.svg"
+                alt="Coreor"
+                width={16}
+                height={16}
+                className="h-4 w-4"
+                priority
+              />
             </div>
             <div className="absolute inset-0 rounded-lg border border-primary/40 group-hover:border-primary/70 transition-colors animate-glow-border" />
           </div>
-          <span className="text-lg font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
-            Coreor
+          <span className="inline-flex items-baseline gap-0.5 leading-none">
+            <span className="text-lg font-bold tracking-tight text-foreground group-hover:text-primary transition-colors leading-none">
+              Coreor
+            </span>
+            <span className="hidden sm:inline-block text-xs text-muted-foreground font-medium leading-none relative -top-[1px]">
+              .net
+            </span>
           </span>
-          <span className="text-xs text-muted-foreground font-medium hidden sm:block">.net</span>
         </button>
 
         {/* Desktop nav */}

@@ -21,10 +21,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return buildSiteMetadata({
-    title: `${service.title} | Coreor Services`,
-    description: service.overview,
+    title: service.seoTitle,
+    description: service.seoDescription,
     path: `/services/${service.slug}`,
-    keywords: [service.title, service.short, "software services", "coreor"],
+    keywords: [...service.keywords, service.title, "Coreor services"],
   })
 }
 

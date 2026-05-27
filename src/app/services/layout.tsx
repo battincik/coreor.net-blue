@@ -4,7 +4,7 @@ import { buildSiteMetadata } from "@/lib/seo"
 export const metadata: Metadata = buildSiteMetadata({
   title: "Services",
   description:
-    "Explore Coreor's services for web development, mobile apps, cloud solutions, AI integration, databases, and managed hosting.",
+    "Explore Coreor's services for web development, mobile apps, cloud solutions, AI integration, databases, and managed hosting in detailed, SEO-friendly service pages.",
   path: "/services",
   keywords: ["services", "web development", "mobile apps", "cloud solutions", "ai integration"],
 })

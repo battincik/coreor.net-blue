@@ -11,7 +11,7 @@ export const siteConfig = {
   email: "hello@coreor.net",
   phone: "+90 (312) 911 4815",
   location: "Ankara, Turkey",
-  logo: `${siteUrl}/icon.svg`,
+  logo: `${siteUrl}/favicon.svg`,
   ogImage: `${siteUrl}/og-image.svg`,
 }
 
@@ -145,12 +145,21 @@ export function buildSiteMetadata({
     icons: {
       icon: [
         {
-          url: "/icon.svg",
+          url: "/favicon.svg",
           type: "image/svg+xml",
         },
+        {
+          url: "/favicon-96x96.png",
+          type: "image/png",
+          sizes: "96x96",
+        },
+        {
+          url: "/favicon.ico",
+          type: "image/x-icon",
+        },
       ],
-      shortcut: "/icon.svg",
-      apple: "/icon.svg",
+      shortcut: "/favicon.ico",
+      apple: "/apple-touch-icon.png",
     },
     formatDetection: {
       email: false,
