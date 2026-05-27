@@ -3,6 +3,10 @@ import createMDX from '@next/mdx'
 
 const withMDX = createMDX({
   extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: ["remark-frontmatter", "remark-mdx-frontmatter", "remark-gfm"],
+    rehypePlugins: ["rehype-slug", "rehype-highlight"],
+  },
 })
 
 const nextConfig: NextConfig = {

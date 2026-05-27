@@ -2,12 +2,13 @@
 
 import { usePathname, useRouter } from "next/navigation"
 
-export type Page = "home" | "about" | "works" | "careers" | "contact"
+export type Page = "home" | "about" | "works" | "blog" | "careers" | "contact"
 
 const PAGE_TO_PATH: Record<Page, string> = {
   home: "/",
   about: "/about",
   works: "/works",
+  blog: "/blog",
   careers: "/careers",
   contact: "/contact",
 }
@@ -16,6 +17,7 @@ const PATH_TO_PAGE: Record<string, Page> = {
   "/": "home",
   "/about": "about",
   "/works": "works",
+  "/blog": "blog",
   "/careers": "careers",
   "/contact": "contact",
 }
@@ -29,7 +31,7 @@ export function useNav(): NavContextType {
   const pathname = usePathname()
   const router = useRouter()
 
-  const currentPage = PATH_TO_PAGE[pathname] ?? "home"
+  const currentPage = pathname.startsWith("/blog") ? "blog" : PATH_TO_PAGE[pathname] ?? "home"
 
   const navigate = (page: Page) => {
     router.push(PAGE_TO_PATH[page] as any)

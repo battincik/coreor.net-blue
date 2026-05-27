@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 const navLinks: { label: string; page: Page }[] = [
   { label: "About", page: "about" },
   { label: "Works", page: "works" },
+  { label: "Blog", page: "blog" },
   { label: "Careers", page: "careers" },
   { label: "Contact", page: "contact" },
 ]

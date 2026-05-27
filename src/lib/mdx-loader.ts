@@ -1,6 +1,8 @@
-export async function loadPostComponent(slug: string) {
+export async function loadPostComponent(slug: string, mdxPath?: string) {
   try {
-    return (await import(`@/content/blog/${slug}.mdx`)).default
+    const fileName = mdxPath?.split("/").pop()?.replace(/\.mdx$/, "")
+    const importKey = fileName || slug
+    return (await import(`@/content/blog/${importKey}.mdx`)).default
   } catch {
     return null
   }

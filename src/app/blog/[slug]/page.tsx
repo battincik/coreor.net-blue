@@ -1,10 +1,44 @@
-import Script from "next/script"
-import { getPostBySlug } from "@/lib/blog"
+import Link from "next/link"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import rehypeHighlight from "rehype-highlight"
+import rehypeSlug from "rehype-slug"
+import { POSTS, getPostBySlug } from "@/lib/blog"
 import { absoluteUrl, buildArticleJsonLd, siteConfig } from "@/lib/seo"
-import { loadPostComponent } from "@/lib/mdx-loader"
 
 type Props = {
   params: Promise<{ slug: string }>
+}
+
+function slugifyHeading(value: string) {
+  return value
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+}
+
+function extractToc(content: string) {
+  const headings: Array<{ text: string; id: string; level: 2 | 3 }> = []
+  const matches = content.matchAll(/^(##|###)\s+(.+)$/gm)
+
+  for (const match of matches) {
+    const level = match[1] === "##" ? 2 : 3
+    const text = match[2].replace(/`/g, "").replace(/\*\*/g, "").trim()
+    const id = slugifyHeading(text)
+
+    if (text && id) {
+      headings.push({ text, id, level })
+    }
+  }
+
+  return headings
+}
+
+function hasInlineToc(content: string) {
+  return /(^|\n)##\s+(İçindekiler|Table of Contents)\s*$/im.test(content)
 }
 
 export default async function BlogPost({ params }: Props) {
@@ -22,8 +56,13 @@ export default async function BlogPost({ params }: Props) {
     )
   }
 
-  // Load MDX component via static mapping so Next can bundle it
-  const MDXContent = post.mdx ? await loadPostComponent(post.slug) : null
+  const toc = extractToc(post.content)
+  const showGeneratedToc = !hasInlineToc(post.content) && toc.length > 0
+  const relatedPosts = post.related
+    .map((slug) => POSTS.find((p) => p.slug === slug))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .slice(0, 5)
+  const latestPosts = POSTS.filter((p) => p.slug !== post.slug).slice(0, 5)
   const articleJsonLd = buildArticleJsonLd({
     name: post.title,
     description: post.excerpt,
@@ -36,43 +75,99 @@ export default async function BlogPost({ params }: Props) {
 
   return (
     <>
-      <Script id={`blog-post-jsonld-${post.slug}`} type="application/ld+json" strategy="beforeInteractive">
-        {JSON.stringify(articleJsonLd)}
-      </Script>
-      <main className="pt-28 pb-24">
-        <div className="max-w-4xl mx-auto px-6">
-        <div className="mb-6 text-xs text-muted-foreground">{post.date} • {post.author}</div>
+      <script
+        id={`blog-post-jsonld-${post.slug}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <main className="relative pt-28 pb-24 overflow-hidden">
+        <div className="absolute inset-0 grid-bg" />
+        <div className="absolute inset-0 hero-glow" />
+        <div
+          className="absolute top-24 -left-24 w-72 h-72 rounded-full opacity-20 animate-float"
+          style={{ background: "radial-gradient(circle, oklch(0.76 0.15 200 / 0.25), transparent)" }}
+        />
+        <div
+          className="absolute bottom-16 -right-24 w-80 h-80 rounded-full opacity-10 animate-float-delayed"
+          style={{ background: "radial-gradient(circle, oklch(0.68 0.14 170 / 0.22), transparent)" }}
+        />
 
-        <h1 className="text-4xl font-extrabold mb-2">{post.title}</h1>
-        <p className="text-lg text-muted-foreground mb-4">{post.excerpt}</p>
+        <div className="relative max-w-7xl mx-auto px-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div>
+            <div className="glass glow-card rounded-2xl p-6 md:p-8 mb-8">
+              <div className="mb-6 text-xs tracking-wide uppercase text-muted-foreground">{post.date} • {post.author}</div>
 
-        <div className="flex gap-2 items-center mb-6">
-          {post.tags?.map((t) => (
-            <span key={t} className="text-xs uppercase tracking-wide text-primary/80 bg-primary/5 px-2 py-1 rounded">
-              {t}
-            </span>
-          ))}
-        </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold mb-3 leading-tight">{post.title}</h1>
+              <p className="text-lg text-muted-foreground mb-5">{post.excerpt}</p>
 
-        <article className="prose max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary">
-          {MDXContent ? <MDXContent /> : post.content.split('\n').map((line, i) => {
-            const trimmed = line.trim()
-            if (!trimmed) return <div key={i} className="h-2" />
-            if (trimmed.startsWith('###')) {
-              return <h3 key={i} className="text-lg font-semibold mt-4 mb-2">{trimmed.replace(/^#+\s/, '')}</h3>
-            }
-            if (trimmed.startsWith('##')) {
-              return <h2 key={i} className="text-2xl font-bold mt-6 mb-3">{trimmed.replace(/^#+\s/, '')}</h2>
-            }
-            if (trimmed.startsWith('- ')) {
-              return <li key={i} className="ml-6 list-disc">{trimmed.replace(/^-\s/, '')}</li>
-            }
-            if (trimmed.startsWith('**') && trimmed.endsWith('**:')) {
-              return <strong key={i} className="block mt-3 mb-1">{trimmed.replace(/\*\*/g, '')}</strong>
-            }
-            return <p key={i}>{line}</p>
-          })}
-        </article>
+              <div className="flex flex-wrap gap-2 items-center">
+                {post.tags?.map((t) => (
+                  <span key={t} className="text-xs uppercase tracking-widest text-primary/90 bg-primary/10 border border-primary/30 px-2.5 py-1 rounded-full">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <article className="blog-content glass glow-card rounded-2xl p-6 md:p-8 text-muted-foreground">
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug, rehypeHighlight]}>{post.content}</ReactMarkdown>
+            </article>
+          </div>
+
+          <aside className="lg:sticky lg:top-28 self-start space-y-5">
+            {showGeneratedToc && (
+              <nav className="glass glow-card rounded-2xl p-5" aria-label="Table of Contents">
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground/80">Table of Contents</h2>
+                <ul className="space-y-1 text-sm">
+                  {toc.map((item) => (
+                    <li key={`${item.id}-${item.level}`} className={item.level === 3 ? "ml-4" : ""}>
+                      <a href={`#${item.id}`} className="text-muted-foreground hover:text-primary transition-colors leading-6">
+                        {item.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+
+            {relatedPosts.length > 0 && (
+              <section className="glass glow-card rounded-2xl p-5">
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground/80">Related Articles</h2>
+                <ul className="space-y-2">
+                  {relatedPosts.map((item) => (
+                    <li key={item.slug}>
+                      <Link href={`/blog/${item.slug}`} className="group block text-sm text-muted-foreground hover:text-primary transition-colors">
+                        <span className="group-hover:underline underline-offset-4">{item.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <section className="glass glow-card rounded-2xl p-5">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground/80">Latest Articles</h2>
+              <ul className="space-y-2">
+                {latestPosts.map((item) => (
+                  <li key={item.slug}>
+                    <Link href={`/blog/${item.slug}`} className="group block text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <span className="group-hover:underline underline-offset-4">{item.title}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="glass glow-card rounded-2xl p-5">
+              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-foreground/80">Coreor Insights</h2>
+              <p className="text-sm text-muted-foreground leading-6 mb-3">
+                Follow engineering, performance, security, and cloud-focused articles to make better project decisions faster.
+              </p>
+              <Link href="/blog" className="text-sm font-medium text-primary hover:underline underline-offset-4">
+                View All Articles
+              </Link>
+            </section>
+          </aside>
         </div>
       </main>
     </>

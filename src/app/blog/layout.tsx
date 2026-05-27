@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import Script from "next/script"
 import { POSTS } from "@/lib/blog"
 import { absoluteUrl, buildCollectionJsonLd, buildSiteMetadata } from "@/lib/seo"
 
@@ -27,9 +26,11 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <>
-      <Script id="blog-collection-jsonld" type="application/ld+json" strategy="beforeInteractive">
-        {JSON.stringify(blogCollectionJsonLd)}
-      </Script>
+      <script
+        id="blog-collection-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogCollectionJsonLd) }}
+      />
       {children}
     </>
   )

@@ -8,6 +8,7 @@ export type Post = {
     author: string
     excerpt: string
     tags: string[]
+    related: string[]
     content: string
     mdx?: string
 }
@@ -19,6 +20,7 @@ type Frontmatter = {
     excerpt?: string
     slug?: string
     tags?: string[]
+    related?: string[]
 }
 
 const BLOG_DIR = path.join(process.cwd(), "src", "content", "blog")
@@ -40,16 +42,17 @@ function parseInlineArray(value: string) {
 }
 
 function parseFrontmatter(source: string): { frontmatter: Frontmatter; content: string } {
-    const match = source.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/)
+    const normalized = source.replace(/^\uFEFF/, "")
+    const match = normalized.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/)
     if (!match) {
-        return { frontmatter: {}, content: source }
+        return { frontmatter: {}, content: normalized }
     }
 
     const [, block, body] = match
     const frontmatter: Frontmatter = {}
     let listKey: keyof Frontmatter | null = null
 
-    for (const rawLine of block.split("\n")) {
+    for (const rawLine of block.split(/\r?\n/)) {
         const line = rawLine.trim()
         if (!line || line.startsWith("#")) continue
 
@@ -75,6 +78,9 @@ function parseFrontmatter(source: string): { frontmatter: Frontmatter; content: 
             if (key === "tags") {
                 frontmatter.tags = []
                 listKey = "tags"
+            } else if (key === "related") {
+                frontmatter.related = []
+                listKey = "related"
             } else {
                 listKey = null
             }
@@ -84,8 +90,12 @@ function parseFrontmatter(source: string): { frontmatter: Frontmatter; content: 
         listKey = null
 
         if (key === "tags") {
-            const values = parseInlineArray(rawValue)
-            frontmatter.tags = values
+            frontmatter.tags = parseInlineArray(rawValue)
+            continue
+        }
+
+        if (key === "related") {
+            frontmatter.related = parseInlineArray(rawValue)
             continue
         }
 
@@ -127,6 +137,7 @@ function getAllPosts(): Post[] {
             author: frontmatter.author || "Coreor Team",
             excerpt: frontmatter.excerpt || deriveExcerpt(content),
             tags: frontmatter.tags || [],
+            related: frontmatter.related || [],
             content,
             mdx: `@/content/blog/${file}`,
         }
