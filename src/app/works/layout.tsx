@@ -7,6 +7,7 @@ export const metadata: Metadata = buildSiteMetadata({
     "Review selected software, cloud, and digital product projects delivered by Coreor for modern businesses.",
   path: "/works",
   keywords: ["case studies", "portfolio", "software projects", "coreor work"],
+  pageType: "works",
 })
 
 export default function WorksLayout({ children }: { children: React.ReactNode }) {

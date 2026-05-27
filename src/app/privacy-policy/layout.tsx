@@ -7,6 +7,7 @@ export const metadata: Metadata = buildSiteMetadata({
     "Understand how Coreor collects, uses, shares, and protects personal data across its websites, forms, and services.",
   path: "/privacy-policy",
   keywords: ["privacy policy", "data protection", "gdpr", "kvkk", "personal data"],
+  pageType: "legal",
 })
 
 export default function PrivacyPolicyLayout({ children }: { children: React.ReactNode }) {

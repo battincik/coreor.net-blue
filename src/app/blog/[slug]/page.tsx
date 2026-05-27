@@ -1,4 +1,6 @@
+import Script from "next/script"
 import { getPostBySlug } from "@/lib/blog"
+import { absoluteUrl, buildArticleJsonLd, siteConfig } from "@/lib/seo"
 import { loadPostComponent } from "@/lib/mdx-loader"
 
 type Props = {
@@ -22,10 +24,23 @@ export default async function BlogPost({ params }: Props) {
 
   // Load MDX component via static mapping so Next can bundle it
   const MDXContent = post.mdx ? await loadPostComponent(post.slug) : null
+  const articleJsonLd = buildArticleJsonLd({
+    name: post.title,
+    description: post.excerpt,
+    url: absoluteUrl(`/blog/${post.slug}`),
+    image: siteConfig.ogImage,
+    publishedTime: post.date,
+    author: post.author,
+    tags: post.tags,
+  })
 
   return (
-    <main className="pt-28 pb-24">
-      <div className="max-w-4xl mx-auto px-6">
+    <>
+      <Script id={`blog-post-jsonld-${post.slug}`} type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(articleJsonLd)}
+      </Script>
+      <main className="pt-28 pb-24">
+        <div className="max-w-4xl mx-auto px-6">
         <div className="mb-6 text-xs text-muted-foreground">{post.date} • {post.author}</div>
 
         <h1 className="text-4xl font-extrabold mb-2">{post.title}</h1>
@@ -58,7 +73,8 @@ export default async function BlogPost({ params }: Props) {
             return <p key={i}>{line}</p>
           })}
         </article>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   )
 }

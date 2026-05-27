@@ -7,6 +7,7 @@ export const metadata: Metadata = buildSiteMetadata({
     "Join Coreor's remote-first engineering team and work on software, cloud, and product projects with long-term impact.",
   path: "/careers",
   keywords: ["careers", "jobs", "remote engineering", "software jobs", "coreor hiring"],
+  pageType: "careers",
 })
 
 export default function CareersLayout({ children }: { children: React.ReactNode }) {

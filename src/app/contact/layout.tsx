@@ -7,6 +7,7 @@ export const metadata: Metadata = buildSiteMetadata({
     "Contact Coreor about software development, cloud infrastructure, database engineering, and digital product delivery.",
   path: "/contact",
   keywords: ["contact coreor", "software quote", "cloud consulting", "web development agency"],
+  pageType: "contact",
 })
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

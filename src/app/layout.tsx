@@ -4,7 +4,7 @@ import { Suspense } from "react"
 import "@/index.css"
 import { Providers } from "@/components/providers"
 import { Analytics } from "@/components/analytics"
-import { buildSiteMetadata, organizationJsonLd } from "@/lib/seo"
+import { buildSiteMetadata, buildWebsiteJsonLd, organizationJsonLd } from "@/lib/seo"
 import { SiteShell } from "@/components/site-shell"
 
 export const metadata: Metadata = buildSiteMetadata({
@@ -21,6 +21,7 @@ export const metadata: Metadata = buildSiteMetadata({
     "database management",
     "cybersecurity",
   ],
+  pageType: "home",
 })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -45,6 +46,9 @@ gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname });
         ) : null}
         <Script id="organization-jsonld" type="application/ld+json" strategy="beforeInteractive">
           {JSON.stringify(organizationJsonLd)}
+        </Script>
+        <Script id="website-jsonld" type="application/ld+json" strategy="beforeInteractive">
+          {JSON.stringify(buildWebsiteJsonLd())}
         </Script>
         <Providers>
           <Suspense fallback={null}>

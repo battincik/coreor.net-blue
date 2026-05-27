@@ -17,15 +17,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       path: `/blog/${resolved.slug}`,
       keywords: ["blog", "article"],
       noIndex: true,
+      pageType: "blogPost",
     })
   }
 
   return buildSiteMetadata({
-    title: `${post.title} | Coreor Insights`,
+    title: post.title,
     description: post.excerpt,
     path: `/blog/${post.slug}`,
     keywords: [...post.tags, "Coreor blog", "engineering"],
     type: "article",
+    pageType: "blogPost",
     article: {
       publishedTime: post.date,
       authors: [post.author],

@@ -1,7 +1,9 @@
+import Script from "next/script"
 import { getService } from "@/lib/services"
 import Link from "next/link"
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { absoluteUrl, buildServiceJsonLd, siteConfig } from "@/lib/seo"
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -19,13 +21,26 @@ export default async function ServicePage({ params }: Props) {
     )
   }
 
-  return (
-    <main className="relative overflow-hidden pt-28 pb-24">
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      <div className="absolute inset-0 hero-glow" />
+  const serviceJsonLd = buildServiceJsonLd({
+    name: service.title,
+    description: service.seoDescription,
+    url: absoluteUrl(`/services/${service.slug}`),
+    serviceType: service.title,
+    category: "Digital Service",
+    image: siteConfig.ogImage,
+  })
 
-      <div className="relative max-w-6xl mx-auto px-6">
-        <div className="max-w-4xl">
+  return (
+    <>
+      <Script id={`service-jsonld-${service.slug}`} type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(serviceJsonLd)}
+      </Script>
+      <main className="relative overflow-hidden pt-28 pb-24">
+        <div className="absolute inset-0 grid-bg opacity-40" />
+        <div className="absolute inset-0 hero-glow" />
+
+        <div className="relative max-w-6xl mx-auto px-6">
+          <div className="max-w-4xl">
           <Badge variant="outline" className="mb-5 border-primary/30 text-primary bg-primary/10 text-xs tracking-widest uppercase">
             Service Guide
           </Badge>
@@ -160,7 +175,8 @@ export default async function ServicePage({ params }: Props) {
             </div>
           </aside>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   )
 }
