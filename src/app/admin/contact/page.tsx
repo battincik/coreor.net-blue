@@ -85,7 +85,7 @@ const serviceSubjects = SERVICES.map((service) => ({ value: `service:${service.s
 
 function formatDate(value: string) {
   try {
-    return new Intl.DateTimeFormat("tr-TR", {
+    return new Intl.DateTimeFormat("en-US", {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(new Date(value))
@@ -227,7 +227,7 @@ export default function AdminContactPage() {
       return
     }
 
-    setAuthError("Şifre yanlış.")
+    setAuthError("Incorrect password.")
   }
 
   const resetFilters = () => {
@@ -251,11 +251,11 @@ export default function AdminContactPage() {
               <LockKeyhole className="h-5 w-5" />
             </div>
             <CardTitle className="text-2xl">Admin Contact</CardTitle>
-            <CardDescription>URL üzerinden giriş yapın, şifre ile devam edin.</CardDescription>
+            <CardDescription>Access this page via URL and continue with your password.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Şifre</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Password</label>
               <Input
                 type="password"
                 value={password}
@@ -269,7 +269,7 @@ export default function AdminContactPage() {
               {authError ? <p className="mt-2 text-sm text-destructive">{authError}</p> : null}
             </div>
             <Button onClick={handleLogin} className="w-full btn-glow bg-primary text-primary-foreground font-semibold">
-              Giriş Yap
+              Sign In
             </Button>
           </CardContent>
         </Card>
@@ -297,7 +297,7 @@ export default function AdminContactPage() {
                 Contact <span className="gradient-text">Messages</span>
               </h1>
               <p className="mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
-                Filtreli arama, sayfalama, tarih aralığı ve konu bazlı inceleme.
+                Filtered search, pagination, date range, and subject-based review.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -325,7 +325,7 @@ export default function AdminContactPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setShowAdvanced((s) => !s)} className={cn("border-border/60 bg-background/40", showAdvanced ? "ring-2 ring-primary/30" : "")}>
-                    <Search className="mr-2 h-4 w-4" /> Detaylı Arama
+                    <Search className="mr-2 h-4 w-4" /> Advanced Search
                   </Button>
                   <Button variant="outline" onClick={resetFilters} className="border-border/60 bg-background/40">
                     <X className="mr-2 h-4 w-4" /> Reset
