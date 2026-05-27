@@ -1,0 +1,176 @@
+---
+title: "Prisma Rehberi: Type-Safe ORM, Migration ve Veritabanı Erişim Katmanı"
+date: "2026-05-08"
+author: "Coreor Team"
+tags: ["Prisma", "ORM", "TypeScript", "Database"]
+excerpt: "Prisma ile TypeScript projelerinde tip güvenli veritabanı erişimi, migration yönetimi, ilişki modelleme ve üretim pratiklerini öğrenin."
+slug: "prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani"
+canonical: "/blog/prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani"
+keywords: ["Prisma", "Prisma rehberi", "Prisma nedir", "Prisma örnekleri", "Prisma best practices", "ORM", "TypeScript"]
+related:
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "postgresql-iliskisel-modelleme-index-transaction-ve-performans"
+  - "mysql-iliskisel-tasarim-innodb-index-ve-replikasyon"
+  - "supabase-postgres-auth-realtime-ve-row-level-security"
+  - "nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend"
+---
+
+# Prisma Rehberi: Type-Safe ORM, Migration ve Veritabanı Erişim Katmanı
+
+Prisma, modern yazılım geliştirme dünyasında **TypeScript odaklı ORM ve migration sistemi** için kullanılan en önemli araçlardan biridir. Bu rehberin amacı yalnızca “Prisma nedir?” sorusunu cevaplamak değil; konuyu gerçek projelerde nasıl konumlandıracağınızı, hangi mimari kararları almanız gerektiğini, hangi hatalardan kaçınmanız gerektiğini ve üretim ortamında nasıl güvenle çalıştıracağınızı anlatmaktır.
+
+Bu yazı özellikle Node.js ve TypeScript backend geliştiren ekipler için hazırlandı. Okuma sonunda Prisma hakkında temel terminolojiyi, pratik kullanım alanlarını, örnek kod yaklaşımını, performans ve güvenlik boyutlarını ve diğer teknolojilerle ilişkisini anlayacak seviyeye gelmelisiniz.
+
+## İçindekiler
+
+- [Kısa Tanım](#kısa-tanım)
+- [Ne Zaman Kullanılır?](#ne-zaman-kullanılır)
+- [Temel Kavramlar](#temel-kavramlar)
+- [Mimari Bakış Açısı](#mimari-bakış-açısı)
+- [Örnek Kullanım](#örnek-kullanım)
+- [Üretim Ortamı İçin En İyi Pratikler](#üretim-ortamı-için-en-iyi-pratikler)
+- [Sık Yapılan Hatalar](#sık-yapılan-hatalar)
+- [Ölçekleme ve Performans](#ölçekleme-ve-performans)
+- [Güvenlik ve Bakım](#güvenlik-ve-bakım)
+- [İlgili Yazılar](#ilgili-yazılar)
+- [Sonuç](#sonuç)
+
+## Kısa Tanım
+
+Prisma, tek başına “bir teknoloji adı” gibi görünse de gerçek değeri ekosistem içindeki rolünden gelir. Bir projede Prisma seçildiğinde aslında ekip; geliştirme hızı, bakım kolaylığı, performans beklentisi, operasyon maliyeti ve ekip yetkinliği gibi kararları da birlikte seçmiş olur.
+
+Benim güçlü görüşüm şu: **Prisma yalnızca popüler olduğu için seçilmemeli; problem alanına, ekibin yetkinliğine ve ürünün önümüzdeki 12-24 aylık yol haritasına uyduğu için seçilmelidir.** Aksi durumda ilk ay hızlı görünen karar, altıncı ayda teknik borç olarak geri döner.
+
+SEO açısından bu yazının hedeflediği ana arama niyetleri şunlardır:
+
+- Prisma nedir?
+- Prisma ne işe yarar?
+- Prisma nasıl kullanılır?
+- Prisma avantajları ve dezavantajları nelerdir?
+- Prisma production best practices nelerdir?
+
+## Ne Zaman Kullanılır?
+
+Prisma özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **Next.js backend**: Next.js backend senaryosunda Prisma, TypeScript odaklı ORM ve migration sistemi ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **NestJS API**: NestJS API senaryosunda Prisma, TypeScript odaklı ORM ve migration sistemi ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **SaaS uygulaması**: SaaS uygulaması senaryosunda Prisma, TypeScript odaklı ORM ve migration sistemi ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **admin panel**: admin panel senaryosunda Prisma, TypeScript odaklı ORM ve migration sistemi ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **monorepo**: monorepo senaryosunda Prisma, TypeScript odaklı ORM ve migration sistemi ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+
+Bu senaryolarda ortak nokta, teknolojiyi sadece “çalıştırmak” değil, onu sürdürülebilir bir sistem parçası hâline getirmektir. Örneğin bir MVP geliştiriyorsanız hız önemlidir; fakat MVP başarıya ulaştığında aynı yapının gözlemlenebilir, test edilebilir ve güvenli olması gerekir. Bu yüzden Prisma seçimi yapılırken yalnızca başlangıç maliyetine değil, yaşam döngüsü maliyetine de bakılmalıdır.
+
+## Temel Kavramlar
+
+Prisma öğrenirken aşağıdaki kavramları netleştirmek gerekir:
+
+- **schema.prisma**: Prisma ekosisteminde schema.prisma kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **Prisma Client**: Prisma ekosisteminde Prisma Client kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **migration**: Prisma ekosisteminde migration kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **relation**: Prisma ekosisteminde relation kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **transaction**: Prisma ekosisteminde transaction kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **generated types**: Prisma ekosisteminde generated types kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+
+Bu kavramlar öğrenilmeden yapılan implementasyonlar genellikle yüzeysel kalır. Bir teknolojiyle birkaç “hello world” örneği yapmak kolaydır; zor olan, ekip büyüdüğünde, trafik arttığında ve ürün karmaşıklaştığında aynı teknolojiyi kontrollü biçimde kullanmaya devam edebilmektir.
+
+## Mimari Bakış Açısı
+
+Prisma kullanılan bir sistemde ilk karar, sınırların nasıl çizileceğidir. Kod tabanı küçükken her şey aynı klasörde yaşayabilir; ancak büyüyen sistemlerde şu sorulara erken cevap verilmelidir:
+
+1. Domain mantığı nerede duracak?
+2. Dış dünya ile iletişim hangi katmandan geçecek?
+3. Test edilebilirlik için bağımlılıklar nasıl izole edilecek?
+4. Hata yönetimi merkezi mi, dağıtık mı olacak?
+5. Gözlemlenebilirlik hangi seviyede başlatılacak?
+
+Prisma veri katmanında konumlandığı için modelleme kararları uzun ömürlüdür. Sorgu desenleri, transaction ihtiyacı, veri büyüme hızı ve migration stratejisi baştan düşünülmelidir.
+
+İyi mimari, teknolojiyi görünmez kılar. Kullanıcılar Prisma kullandığınızı bilmez; sadece sistemin hızlı, güvenilir ve tutarlı çalıştığını hisseder. Geliştiriciler ise teknolojinin sunduğu soyutlamalar sayesinde yeni özellikleri daha düşük riskle ekler.
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Prisma için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Gerçek projede validation, hata yönetimi, logging, test ve güvenlik katmanları ayrıca eklenmelidir.
+
+```prisma
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  posts     Post[]
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id       String @id @default(uuid())
+  title    String
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+}
+```
+
+Bu örneği production kodu gibi düşünmeyin; bunu zihinsel model olarak düşünün. İyi örnek kod, teknolojinin hangi problemi çözdüğünü gösterir. Production kodu ise o problemi güvenlik, performans, bakım ve ekip süreçleriyle birlikte çözer.
+
+## Üretim Ortamı İçin En İyi Pratikler
+
+Prisma production ortamına taşındığında aşağıdaki pratikler kritik hâle gelir:
+
+- **Konfigürasyonu koddan ayırın.** Ortam değişkenleri, secret yönetimi ve deploy konfigürasyonu açıkça ayrılmalıdır.
+- **Hata yönetimini standartlaştırın.** Her hata aynı formatta loglanmalı, izlenmeli ve mümkünse kullanıcıya kontrollü cevap dönmelidir.
+- **Test stratejisi kurun.** Unit test, integration test ve kritik akışlar için e2e test seviyelerini netleştirin.
+- **Gözlemlenebilirliği baştan ekleyin.** Log, metric ve trace sonradan eklenince genellikle eksik kalır.
+- **Performansı ölçmeden optimize etmeyin.** Tahminle yapılan optimizasyonlar çoğu zaman yanlış katmanı iyileştirir.
+- **Dokümantasyon yazın.** Teknoloji kararının nedeni, sınırları ve alternatifleri ADR formatında saklanmalıdır.
+- **Versiyon yükseltmeyi süreç hâline getirin.** Bağımlılıkları yıllarca sabit bırakmak kısa vadede rahat, uzun vadede pahalıdır.
+
+## Sık Yapılan Hatalar
+
+- **migration dosyasını incelememek**: migration dosyasını incelememek kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **N+1 query**: N+1 query kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **transaction gerektiren işi ayrı çağrılarla yapmak**: transaction gerektiren işi ayrı çağrılarla yapmak kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **domain entity ile Prisma modelini karıştırmak**: domain entity ile Prisma modelini karıştırmak kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+
+Bu hatalar genellikle teknoloji kötü olduğu için değil, bağlam yanlış kurulduğu için ortaya çıkar. Prisma iyi bir araç olabilir; fakat her aracı aynı problem için kullanmaya çalışmak mimariyi kırılganlaştırır.
+
+## Ölçekleme ve Performans
+
+Performans yalnızca hız demek değildir. Performans; doğru kaynak kullanımı, tahmin edilebilir gecikme, stabil throughput ve kullanıcı deneyimi demektir. Prisma ile çalışırken performansı şu metriklerle değerlendirmek gerekir:
+
+- Ortalama yanıt süresi
+- P95/P99 gecikme
+- Hata oranı
+- Kaynak kullanımı
+- Soğuk başlangıç veya ilk yükleme maliyeti
+- Cache hit/miss oranı
+- Kullanıcı deneyimine yansıyan metrikler
+
+Prisma performansında doğru veri modeli, index stratejisi, sorgu planı ve veri büyüme paterni belirleyicidir. En pahalı optimizasyon, yanlış modellenmiş veriyi sonradan düzeltmektir.
+
+Ölçekleme kararı almadan önce darboğazı ölçmek gerekir. Kod mu yavaş, veritabanı mı zorlanıyor, ağ gecikmesi mi yüksek, yoksa yanlış cache stratejisi mi var? Bu soruya cevap vermeden yapılan yatay ölçekleme çoğu zaman maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Prisma projelerinde güvenlik, framework veya araç seçimiyle otomatik çözülmez. Güvenlik bir süreçtir. Kimlik doğrulama, yetkilendirme, input validation, secret yönetimi, dependency taraması ve log hijyeni birlikte ele alınmalıdır.
+
+Bakım tarafında ise şu yaklaşım güçlüdür:
+
+- Her kritik bağımlılık için owner belirleyin.
+- Major versiyon yükseltmelerini küçük parçalara bölün.
+- Deprecated API kullanımını CI içinde yakalayın.
+- Test kapsamını sadece oran olarak değil, risk alanı olarak takip edin.
+- Incident sonrası teknik borçları backlog'a değil, doğrudan iyileştirme planına alın.
+
+## İlgili Yazılar
+
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod)
+- [PostgreSQL](/blog/postgresql-iliskisel-modelleme-index-transaction-ve-performans)
+- [MySQL](/blog/mysql-iliskisel-tasarim-innodb-index-ve-replikasyon)
+- [Supabase](/blog/supabase-postgres-auth-realtime-ve-row-level-security)
+- [NestJS](/blog/nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend)
+
+Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Örneğin Prisma öğrenen bir okuyucu, sonraki adımda hangi teknolojiyi gerçekten merak edecekse link oraya gitmelidir.
+
+## Sonuç
+
+Prisma, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Ancak iyi teknoloji seçimi, yalnızca “hangi araç daha popüler?” sorusuyla yapılamaz. Asıl soru şudur: **Bu araç, ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?**
+
+Bu rehberde Prisma için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kodu, production pratiklerini, hataları, performans ve güvenlik boyutlarını ele aldık. Bir sonraki adım olarak ilgili yazılara geçip Prisma teknolojisini ekosistem içindeki diğer parçalarla birlikte düşünmeniz önerilir.

@@ -1,0 +1,170 @@
+---
+title: "React Native Rehberi: Cross-Platform Mobil Uygulama Mimarisi"
+date: "2026-05-16"
+author: "Coreor Team"
+tags: ["React Native", "Mobile", "React", "Cross Platform"]
+excerpt: "React Native ile iOS ve Android için tek kod tabanında performanslı, sürdürülebilir ve kullanıcı odaklı mobil uygulamalar geliştirmeyi öğrenin."
+slug: "react-native-cross-platform-mobil-uygulama-mimarisi"
+canonical: "/blog/react-native-cross-platform-mobil-uygulama-mimarisi"
+keywords: ["React Native", "React Native rehberi", "React Native nedir", "React Native örnekleri", "React Native best practices", "Mobile", "React"]
+related:
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "swift-modern-ios-gelistirme-tip-guvenligi-ve-concurrency"
+---
+
+# React Native Rehberi: Cross-Platform Mobil Uygulama Mimarisi
+
+React Native, modern yazılım geliştirme dünyasında **React ile native mobil geliştirme** için kullanılan en önemli araçlardan biridir. Bu rehberin amacı yalnızca “React Native nedir?” sorusunu cevaplamak değil; konuyu gerçek projelerde nasıl konumlandıracağınızı, hangi mimari kararları almanız gerektiğini, hangi hatalardan kaçınmanız gerektiğini ve üretim ortamında nasıl güvenle çalıştıracağınızı anlatmaktır.
+
+Bu yazı özellikle mobil ve full-stack ürün ekipleri için hazırlandı. Okuma sonunda React Native hakkında temel terminolojiyi, pratik kullanım alanlarını, örnek kod yaklaşımını, performans ve güvenlik boyutlarını ve diğer teknolojilerle ilişkisini anlayacak seviyeye gelmelisiniz.
+
+## İçindekiler
+
+- [Kısa Tanım](#kısa-tanım)
+- [Ne Zaman Kullanılır?](#ne-zaman-kullanılır)
+- [Temel Kavramlar](#temel-kavramlar)
+- [Mimari Bakış Açısı](#mimari-bakış-açısı)
+- [Örnek Kullanım](#örnek-kullanım)
+- [Üretim Ortamı İçin En İyi Pratikler](#üretim-ortamı-için-en-iyi-pratikler)
+- [Sık Yapılan Hatalar](#sık-yapılan-hatalar)
+- [Ölçekleme ve Performans](#ölçekleme-ve-performans)
+- [Güvenlik ve Bakım](#güvenlik-ve-bakım)
+- [İlgili Yazılar](#ilgili-yazılar)
+- [Sonuç](#sonuç)
+
+## Kısa Tanım
+
+React Native, tek başına “bir teknoloji adı” gibi görünse de gerçek değeri ekosistem içindeki rolünden gelir. Bir projede React Native seçildiğinde aslında ekip; geliştirme hızı, bakım kolaylığı, performans beklentisi, operasyon maliyeti ve ekip yetkinliği gibi kararları da birlikte seçmiş olur.
+
+Benim güçlü görüşüm şu: **React Native yalnızca popüler olduğu için seçilmemeli; problem alanına, ekibin yetkinliğine ve ürünün önümüzdeki 12-24 aylık yol haritasına uyduğu için seçilmelidir.** Aksi durumda ilk ay hızlı görünen karar, altıncı ayda teknik borç olarak geri döner.
+
+SEO açısından bu yazının hedeflediği ana arama niyetleri şunlardır:
+
+- React Native nedir?
+- React Native ne işe yarar?
+- React Native nasıl kullanılır?
+- React Native avantajları ve dezavantajları nelerdir?
+- React Native production best practices nelerdir?
+
+## Ne Zaman Kullanılır?
+
+React Native özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **startup MVP**: startup MVP senaryosunda React Native, React ile native mobil geliştirme ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **e-ticaret mobil uygulaması**: e-ticaret mobil uygulaması senaryosunda React Native, React ile native mobil geliştirme ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **internal field app**: internal field app senaryosunda React Native, React ile native mobil geliştirme ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **fintech mobil**: fintech mobil senaryosunda React Native, React ile native mobil geliştirme ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **chat uygulaması**: chat uygulaması senaryosunda React Native, React ile native mobil geliştirme ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+
+Bu senaryolarda ortak nokta, teknolojiyi sadece “çalıştırmak” değil, onu sürdürülebilir bir sistem parçası hâline getirmektir. Örneğin bir MVP geliştiriyorsanız hız önemlidir; fakat MVP başarıya ulaştığında aynı yapının gözlemlenebilir, test edilebilir ve güvenli olması gerekir. Bu yüzden React Native seçimi yapılırken yalnızca başlangıç maliyetine değil, yaşam döngüsü maliyetine de bakılmalıdır.
+
+## Temel Kavramlar
+
+React Native öğrenirken aşağıdaki kavramları netleştirmek gerekir:
+
+- **native bridge**: React Native ekosisteminde native bridge kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **navigation**: React Native ekosisteminde navigation kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **gesture**: React Native ekosisteminde gesture kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **offline-first**: React Native ekosisteminde offline-first kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **state management**: React Native ekosisteminde state management kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **performance profiling**: React Native ekosisteminde performance profiling kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+
+Bu kavramlar öğrenilmeden yapılan implementasyonlar genellikle yüzeysel kalır. Bir teknolojiyle birkaç “hello world” örneği yapmak kolaydır; zor olan, ekip büyüdüğünde, trafik arttığında ve ürün karmaşıklaştığında aynı teknolojiyi kontrollü biçimde kullanmaya devam edebilmektir.
+
+## Mimari Bakış Açısı
+
+React Native kullanılan bir sistemde ilk karar, sınırların nasıl çizileceğidir. Kod tabanı küçükken her şey aynı klasörde yaşayabilir; ancak büyüyen sistemlerde şu sorulara erken cevap verilmelidir:
+
+1. Domain mantığı nerede duracak?
+2. Dış dünya ile iletişim hangi katmandan geçecek?
+3. Test edilebilirlik için bağımlılıklar nasıl izole edilecek?
+4. Hata yönetimi merkezi mi, dağıtık mı olacak?
+5. Gözlemlenebilirlik hangi seviyede başlatılacak?
+
+React Native tarafında mimariyi ekranlardan değil, tekrar kullanılabilir yeteneklerden başlatmak gerekir. UI bileşenleri domain modelini yutmamalı; veri çekme, state yönetimi, erişilebilirlik ve tasarım sistemi ayrı sorumluluklar olarak ele alınmalıdır.
+
+İyi mimari, teknolojiyi görünmez kılar. Kullanıcılar React Native kullandığınızı bilmez; sadece sistemin hızlı, güvenilir ve tutarlı çalıştığını hisseder. Geliştiriciler ise teknolojinin sunduğu soyutlamalar sayesinde yeni özellikleri daha düşük riskle ekler.
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, React Native için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Gerçek projede validation, hata yönetimi, logging, test ve güvenlik katmanları ayrıca eklenmelidir.
+
+```tsx
+import { View, Text, Pressable } from "react-native";
+
+export function ProfileButton({ name, onPress }: { name: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress}>
+      <View style={{ padding: 16 }}>
+        <Text>{name}</Text>
+      </View>
+    </Pressable>
+  );
+}
+```
+
+Bu örneği production kodu gibi düşünmeyin; bunu zihinsel model olarak düşünün. İyi örnek kod, teknolojinin hangi problemi çözdüğünü gösterir. Production kodu ise o problemi güvenlik, performans, bakım ve ekip süreçleriyle birlikte çözer.
+
+## Üretim Ortamı İçin En İyi Pratikler
+
+React Native production ortamına taşındığında aşağıdaki pratikler kritik hâle gelir:
+
+- **Konfigürasyonu koddan ayırın.** Ortam değişkenleri, secret yönetimi ve deploy konfigürasyonu açıkça ayrılmalıdır.
+- **Hata yönetimini standartlaştırın.** Her hata aynı formatta loglanmalı, izlenmeli ve mümkünse kullanıcıya kontrollü cevap dönmelidir.
+- **Test stratejisi kurun.** Unit test, integration test ve kritik akışlar için e2e test seviyelerini netleştirin.
+- **Gözlemlenebilirliği baştan ekleyin.** Log, metric ve trace sonradan eklenince genellikle eksik kalır.
+- **Performansı ölçmeden optimize etmeyin.** Tahminle yapılan optimizasyonlar çoğu zaman yanlış katmanı iyileştirir.
+- **Dokümantasyon yazın.** Teknoloji kararının nedeni, sınırları ve alternatifleri ADR formatında saklanmalıdır.
+- **Versiyon yükseltmeyi süreç hâline getirin.** Bağımlılıkları yıllarca sabit bırakmak kısa vadede rahat, uzun vadede pahalıdır.
+
+## Sık Yapılan Hatalar
+
+- **web alışkanlıklarını mobile taşımak**: web alışkanlıklarını mobile taşımak kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **liste performansını ölçmemek**: liste performansını ölçmemek kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **offline senaryoları atlamak**: offline senaryoları atlamak kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **native dependency riskini hesaplamamak**: native dependency riskini hesaplamamak kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+
+Bu hatalar genellikle teknoloji kötü olduğu için değil, bağlam yanlış kurulduğu için ortaya çıkar. React Native iyi bir araç olabilir; fakat her aracı aynı problem için kullanmaya çalışmak mimariyi kırılganlaştırır.
+
+## Ölçekleme ve Performans
+
+Performans yalnızca hız demek değildir. Performans; doğru kaynak kullanımı, tahmin edilebilir gecikme, stabil throughput ve kullanıcı deneyimi demektir. React Native ile çalışırken performansı şu metriklerle değerlendirmek gerekir:
+
+- Ortalama yanıt süresi
+- P95/P99 gecikme
+- Hata oranı
+- Kaynak kullanımı
+- Soğuk başlangıç veya ilk yükleme maliyeti
+- Cache hit/miss oranı
+- Kullanıcı deneyimine yansıyan metrikler
+
+React Native performansında render maliyeti, bundle boyutu, cache, lazy loading ve kullanıcı etkileşim süresi birlikte değerlendirilmelidir. Özellikle kullanıcıya görünen ilk anlamlı içerik ve etkileşim gecikmesi kritik metriklerdir.
+
+Ölçekleme kararı almadan önce darboğazı ölçmek gerekir. Kod mu yavaş, veritabanı mı zorlanıyor, ağ gecikmesi mi yüksek, yoksa yanlış cache stratejisi mi var? Bu soruya cevap vermeden yapılan yatay ölçekleme çoğu zaman maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+React Native projelerinde güvenlik, framework veya araç seçimiyle otomatik çözülmez. Güvenlik bir süreçtir. Kimlik doğrulama, yetkilendirme, input validation, secret yönetimi, dependency taraması ve log hijyeni birlikte ele alınmalıdır.
+
+Bakım tarafında ise şu yaklaşım güçlüdür:
+
+- Her kritik bağımlılık için owner belirleyin.
+- Major versiyon yükseltmelerini küçük parçalara bölün.
+- Deprecated API kullanımını CI içinde yakalayın.
+- Test kapsamını sadece oran olarak değil, risk alanı olarak takip edin.
+- Incident sonrası teknik borçları backlog'a değil, doğrudan iyileştirme planına alın.
+
+## İlgili Yazılar
+
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans)
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod)
+- [Swift](/blog/swift-modern-ios-gelistirme-tip-guvenligi-ve-concurrency)
+
+Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Örneğin React Native öğrenen bir okuyucu, sonraki adımda hangi teknolojiyi gerçekten merak edecekse link oraya gitmelidir.
+
+## Sonuç
+
+React Native, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Ancak iyi teknoloji seçimi, yalnızca “hangi araç daha popüler?” sorusuyla yapılamaz. Asıl soru şudur: **Bu araç, ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?**
+
+Bu rehberde React Native için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kodu, production pratiklerini, hataları, performans ve güvenlik boyutlarını ele aldık. Bir sonraki adım olarak ilgili yazılara geçip React Native teknolojisini ekosistem içindeki diğer parçalarla birlikte düşünmeniz önerilir.

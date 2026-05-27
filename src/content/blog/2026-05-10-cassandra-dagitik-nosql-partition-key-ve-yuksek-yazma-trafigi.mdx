@@ -1,0 +1,166 @@
+---
+title: "Cassandra Rehberi: Dağıtık NoSQL, Partition Key ve Yüksek Yazma Trafiği"
+date: "2026-05-10"
+author: "Coreor Team"
+tags: ["Cassandra", "NoSQL", "Distributed Systems", "Database"]
+excerpt: "Apache Cassandra ile yüksek yazma trafiği, yatay ölçeklenebilirlik ve dağıtık veri modelleme için partition key, clustering ve consistency kavramlarını öğrenin."
+slug: "cassandra-dagitik-nosql-partition-key-ve-yuksek-yazma-trafigi"
+canonical: "/blog/cassandra-dagitik-nosql-partition-key-ve-yuksek-yazma-trafigi"
+keywords: ["Cassandra", "Cassandra rehberi", "Cassandra nedir", "Cassandra örnekleri", "Cassandra best practices", "NoSQL", "Distributed Systems"]
+related:
+  - "redis-cache-queue-rate-limit-ve-realtime-veri-yapilari"
+  - "elasticsearch-full-text-search-mapping-analyzer-ve-performans"
+  - "go-basitlik-concurrency-api-servisleri-ve-uretim-mimarisi"
+---
+
+# Cassandra Rehberi: Dağıtık NoSQL, Partition Key ve Yüksek Yazma Trafiği
+
+Cassandra, modern yazılım geliştirme dünyasında **yüksek ölçekli dağıtık wide-column veritabanı** için kullanılan en önemli araçlardan biridir. Bu rehberin amacı yalnızca “Cassandra nedir?” sorusunu cevaplamak değil; konuyu gerçek projelerde nasıl konumlandıracağınızı, hangi mimari kararları almanız gerektiğini, hangi hatalardan kaçınmanız gerektiğini ve üretim ortamında nasıl güvenle çalıştıracağınızı anlatmaktır.
+
+Bu yazı özellikle büyük veri ve dağıtık sistem geliştiren backend ekipleri için hazırlandı. Okuma sonunda Cassandra hakkında temel terminolojiyi, pratik kullanım alanlarını, örnek kod yaklaşımını, performans ve güvenlik boyutlarını ve diğer teknolojilerle ilişkisini anlayacak seviyeye gelmelisiniz.
+
+## İçindekiler
+
+- [Kısa Tanım](#kısa-tanım)
+- [Ne Zaman Kullanılır?](#ne-zaman-kullanılır)
+- [Temel Kavramlar](#temel-kavramlar)
+- [Mimari Bakış Açısı](#mimari-bakış-açısı)
+- [Örnek Kullanım](#örnek-kullanım)
+- [Üretim Ortamı İçin En İyi Pratikler](#üretim-ortamı-için-en-iyi-pratikler)
+- [Sık Yapılan Hatalar](#sık-yapılan-hatalar)
+- [Ölçekleme ve Performans](#ölçekleme-ve-performans)
+- [Güvenlik ve Bakım](#güvenlik-ve-bakım)
+- [İlgili Yazılar](#ilgili-yazılar)
+- [Sonuç](#sonuç)
+
+## Kısa Tanım
+
+Cassandra, tek başına “bir teknoloji adı” gibi görünse de gerçek değeri ekosistem içindeki rolünden gelir. Bir projede Cassandra seçildiğinde aslında ekip; geliştirme hızı, bakım kolaylığı, performans beklentisi, operasyon maliyeti ve ekip yetkinliği gibi kararları da birlikte seçmiş olur.
+
+Benim güçlü görüşüm şu: **Cassandra yalnızca popüler olduğu için seçilmemeli; problem alanına, ekibin yetkinliğine ve ürünün önümüzdeki 12-24 aylık yol haritasına uyduğu için seçilmelidir.** Aksi durumda ilk ay hızlı görünen karar, altıncı ayda teknik borç olarak geri döner.
+
+SEO açısından bu yazının hedeflediği ana arama niyetleri şunlardır:
+
+- Cassandra nedir?
+- Cassandra ne işe yarar?
+- Cassandra nasıl kullanılır?
+- Cassandra avantajları ve dezavantajları nelerdir?
+- Cassandra production best practices nelerdir?
+
+## Ne Zaman Kullanılır?
+
+Cassandra özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **telemetry**: telemetry senaryosunda Cassandra, yüksek ölçekli dağıtık wide-column veritabanı ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **IoT**: IoT senaryosunda Cassandra, yüksek ölçekli dağıtık wide-column veritabanı ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **event log**: event log senaryosunda Cassandra, yüksek ölçekli dağıtık wide-column veritabanı ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **time series**: time series senaryosunda Cassandra, yüksek ölçekli dağıtık wide-column veritabanı ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+- **yüksek yazma trafiği**: yüksek yazma trafiği senaryosunda Cassandra, yüksek ölçekli dağıtık wide-column veritabanı ihtiyacını daha düzenli ve sürdürülebilir yönetmeye yardım eder.
+
+Bu senaryolarda ortak nokta, teknolojiyi sadece “çalıştırmak” değil, onu sürdürülebilir bir sistem parçası hâline getirmektir. Örneğin bir MVP geliştiriyorsanız hız önemlidir; fakat MVP başarıya ulaştığında aynı yapının gözlemlenebilir, test edilebilir ve güvenli olması gerekir. Bu yüzden Cassandra seçimi yapılırken yalnızca başlangıç maliyetine değil, yaşam döngüsü maliyetine de bakılmalıdır.
+
+## Temel Kavramlar
+
+Cassandra öğrenirken aşağıdaki kavramları netleştirmek gerekir:
+
+- **partition key**: Cassandra ekosisteminde partition key kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **clustering column**: Cassandra ekosisteminde clustering column kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **replication factor**: Cassandra ekosisteminde replication factor kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **consistency level**: Cassandra ekosisteminde consistency level kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **write path**: Cassandra ekosisteminde write path kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+- **compaction**: Cassandra ekosisteminde compaction kavramı, kodun davranışını tahmin edilebilir hâle getiren temel yapı taşlarından biridir. Bu kavramı doğru anlamak, bakım maliyetini azaltır ve ekip içi ortak dil oluşturur.
+
+Bu kavramlar öğrenilmeden yapılan implementasyonlar genellikle yüzeysel kalır. Bir teknolojiyle birkaç “hello world” örneği yapmak kolaydır; zor olan, ekip büyüdüğünde, trafik arttığında ve ürün karmaşıklaştığında aynı teknolojiyi kontrollü biçimde kullanmaya devam edebilmektir.
+
+## Mimari Bakış Açısı
+
+Cassandra kullanılan bir sistemde ilk karar, sınırların nasıl çizileceğidir. Kod tabanı küçükken her şey aynı klasörde yaşayabilir; ancak büyüyen sistemlerde şu sorulara erken cevap verilmelidir:
+
+1. Domain mantığı nerede duracak?
+2. Dış dünya ile iletişim hangi katmandan geçecek?
+3. Test edilebilirlik için bağımlılıklar nasıl izole edilecek?
+4. Hata yönetimi merkezi mi, dağıtık mı olacak?
+5. Gözlemlenebilirlik hangi seviyede başlatılacak?
+
+Cassandra veri katmanında konumlandığı için modelleme kararları uzun ömürlüdür. Sorgu desenleri, transaction ihtiyacı, veri büyüme hızı ve migration stratejisi baştan düşünülmelidir.
+
+İyi mimari, teknolojiyi görünmez kılar. Kullanıcılar Cassandra kullandığınızı bilmez; sadece sistemin hızlı, güvenilir ve tutarlı çalıştığını hisseder. Geliştiriciler ise teknolojinin sunduğu soyutlamalar sayesinde yeni özellikleri daha düşük riskle ekler.
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Cassandra için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Gerçek projede validation, hata yönetimi, logging, test ve güvenlik katmanları ayrıca eklenmelidir.
+
+```sql
+CREATE TABLE device_events (
+  device_id text,
+  bucket_day date,
+  event_time timestamp,
+  payload text,
+  PRIMARY KEY ((device_id, bucket_day), event_time)
+) WITH CLUSTERING ORDER BY (event_time DESC);
+```
+
+Bu örneği production kodu gibi düşünmeyin; bunu zihinsel model olarak düşünün. İyi örnek kod, teknolojinin hangi problemi çözdüğünü gösterir. Production kodu ise o problemi güvenlik, performans, bakım ve ekip süreçleriyle birlikte çözer.
+
+## Üretim Ortamı İçin En İyi Pratikler
+
+Cassandra production ortamına taşındığında aşağıdaki pratikler kritik hâle gelir:
+
+- **Konfigürasyonu koddan ayırın.** Ortam değişkenleri, secret yönetimi ve deploy konfigürasyonu açıkça ayrılmalıdır.
+- **Hata yönetimini standartlaştırın.** Her hata aynı formatta loglanmalı, izlenmeli ve mümkünse kullanıcıya kontrollü cevap dönmelidir.
+- **Test stratejisi kurun.** Unit test, integration test ve kritik akışlar için e2e test seviyelerini netleştirin.
+- **Gözlemlenebilirliği baştan ekleyin.** Log, metric ve trace sonradan eklenince genellikle eksik kalır.
+- **Performansı ölçmeden optimize etmeyin.** Tahminle yapılan optimizasyonlar çoğu zaman yanlış katmanı iyileştirir.
+- **Dokümantasyon yazın.** Teknoloji kararının nedeni, sınırları ve alternatifleri ADR formatında saklanmalıdır.
+- **Versiyon yükseltmeyi süreç hâline getirin.** Bağımlılıkları yıllarca sabit bırakmak kısa vadede rahat, uzun vadede pahalıdır.
+
+## Sık Yapılan Hatalar
+
+- **sorguya göre modellememek**: sorguya göre modellememek kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **hot partition üretmek**: hot partition üretmek kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **secondary index'e güvenmek**: secondary index'e güvenmek kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+- **consistency seviyesini iş ihtiyacından koparmak**: consistency seviyesini iş ihtiyacından koparmak kısa vadede hızlı görünür; fakat büyüyen projelerde debug maliyetini ve değişiklik riskini artırır.
+
+Bu hatalar genellikle teknoloji kötü olduğu için değil, bağlam yanlış kurulduğu için ortaya çıkar. Cassandra iyi bir araç olabilir; fakat her aracı aynı problem için kullanmaya çalışmak mimariyi kırılganlaştırır.
+
+## Ölçekleme ve Performans
+
+Performans yalnızca hız demek değildir. Performans; doğru kaynak kullanımı, tahmin edilebilir gecikme, stabil throughput ve kullanıcı deneyimi demektir. Cassandra ile çalışırken performansı şu metriklerle değerlendirmek gerekir:
+
+- Ortalama yanıt süresi
+- P95/P99 gecikme
+- Hata oranı
+- Kaynak kullanımı
+- Soğuk başlangıç veya ilk yükleme maliyeti
+- Cache hit/miss oranı
+- Kullanıcı deneyimine yansıyan metrikler
+
+Cassandra performansında doğru veri modeli, index stratejisi, sorgu planı ve veri büyüme paterni belirleyicidir. En pahalı optimizasyon, yanlış modellenmiş veriyi sonradan düzeltmektir.
+
+Ölçekleme kararı almadan önce darboğazı ölçmek gerekir. Kod mu yavaş, veritabanı mı zorlanıyor, ağ gecikmesi mi yüksek, yoksa yanlış cache stratejisi mi var? Bu soruya cevap vermeden yapılan yatay ölçekleme çoğu zaman maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Cassandra projelerinde güvenlik, framework veya araç seçimiyle otomatik çözülmez. Güvenlik bir süreçtir. Kimlik doğrulama, yetkilendirme, input validation, secret yönetimi, dependency taraması ve log hijyeni birlikte ele alınmalıdır.
+
+Bakım tarafında ise şu yaklaşım güçlüdür:
+
+- Her kritik bağımlılık için owner belirleyin.
+- Major versiyon yükseltmelerini küçük parçalara bölün.
+- Deprecated API kullanımını CI içinde yakalayın.
+- Test kapsamını sadece oran olarak değil, risk alanı olarak takip edin.
+- Incident sonrası teknik borçları backlog'a değil, doğrudan iyileştirme planına alın.
+
+## İlgili Yazılar
+
+- [Redis](/blog/redis-cache-queue-rate-limit-ve-realtime-veri-yapilari)
+- [Elasticsearch](/blog/elasticsearch-full-text-search-mapping-analyzer-ve-performans)
+- [Go](/blog/go-basitlik-concurrency-api-servisleri-ve-uretim-mimarisi)
+
+Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Örneğin Cassandra öğrenen bir okuyucu, sonraki adımda hangi teknolojiyi gerçekten merak edecekse link oraya gitmelidir.
+
+## Sonuç
+
+Cassandra, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Ancak iyi teknoloji seçimi, yalnızca “hangi araç daha popüler?” sorusuyla yapılamaz. Asıl soru şudur: **Bu araç, ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?**
+
+Bu rehberde Cassandra için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kodu, production pratiklerini, hataları, performans ve güvenlik boyutlarını ele aldık. Bir sonraki adım olarak ilgili yazılara geçip Cassandra teknolojisini ekosistem içindeki diğer parçalarla birlikte düşünmeniz önerilir.

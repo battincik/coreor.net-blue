@@ -55,6 +55,10 @@ export const siteConfig = {
   socials: socialProfiles,
 }
 
+function canonicalUrl(path: string) {
+  return absoluteUrl(path)
+}
+
 export const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -297,7 +301,8 @@ export function buildServiceJsonLd(options: {
 
 function normalizePath(path: string) {
   if (!path) return "/"
-  return path.startsWith("/") ? path : `/${path}`
+  const cleanedPath = path.split(/[?#]/)[0].replace(/\/+/g, "/")
+  return cleanedPath.startsWith("/") ? cleanedPath : `/${cleanedPath}`
 }
 
 export function absoluteUrl(path: string) {
@@ -381,7 +386,7 @@ export function buildSiteMetadata({
     publisher: siteConfig.name,
     applicationName: siteConfig.name,
     alternates: {
-      canonical: canonicalPath,
+      canonical: canonicalUrl(canonicalPath),
     },
     verification: {
       google: siteVerification.google ?? undefined,
