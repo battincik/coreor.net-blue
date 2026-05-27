@@ -1,0 +1,174 @@
+---
+title: "Zustand Rehberi: Basit React State Yönetimi, Store Tasarımı ve Performans"
+date: "2026-04-11"
+author: "Coreor Team"
+tags: ["Zustand", "React", "State Management", "Frontend"]
+excerpt: "Zustand ile küçük ve orta ölçekli React uygulamalarında sade global state yönetimi, selector kullanımı ve store sınırlarını doğru belirlemeyi öğrenin."
+slug: "zustand-basit-react-state-yonetimi-store-tasarimi-ve-performans"
+canonical: "/blog/zustand-basit-react-state-yonetimi-store-tasarimi-ve-performans"
+keywords: ["Zustand", "Zustand rehberi", "Zustand nedir", "Zustand best practices", "Zustand örnekleri", "React", "State Management", "Frontend"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "frontend"
+related:
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+  - "tailwind-css-utility-first-tasarim-responsive-layout-ve-tasarim-sistemi"
+  - "vite-modern-frontend-build-sistemi-hmr-ve-uretim-optimizasyonu"
+  - "turborepo-typescript-monorepo-cache-pipeline-ve-paket-yonetimi"
+  - "pnpm-hizli-paket-yonetimi-workspace-ve-deterministic-install"
+  - "tanstack-query-server-state-cache-mutation-ve-veri-senkronizasyonu"
+  - "redux-toolkit-predictable-state-slice-middleware-ve-buyuk-react-uygulamalari"
+  - "react-hook-form-performansli-form-yonetimi-validation-ve-ux"
+  - "storybook-component-dokumantasyonu-ui-test-ve-tasarim-sistemi"
+  - "eslint-javascript-typescript-kod-kalitesi-kurallar-ve-ci-entegrasyonu"
+  - "prettier-otomatik-kod-formatlama-takim-standardi-ve-tooling"
+  - "nextjs-app-router-server-components-routing-caching-ve-seo"
+---
+# Zustand Rehberi: Basit React State Yönetimi, Store Tasarımı ve Performans
+
+Zustand, modern yazılım geliştirme ekosisteminde **minimal global state yönetimi** için kullanılan önemli başlıklardan biridir. Bu yazı, Zustand konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle React uygulamalarında Redux dışı sade state çözümü arayan geliştiriciler için hazırlandı. Amaç, yazıyı okuyan kişinin Zustand hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** Zustand
+- **Arama niyeti:** Zustand nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde frontend kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+Zustand, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **Zustand kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+Zustand özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **UI preference**: UI preference senaryosunda Zustand, minimal global state yönetimi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **auth session state**: auth session state senaryosunda Zustand, minimal global state yönetimi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **wizard flow**: wizard flow senaryosunda Zustand, minimal global state yönetimi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **local app state**: local app state senaryosunda Zustand, minimal global state yönetimi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **dashboard filtreleri**: dashboard filtreleri senaryosunda Zustand, minimal global state yönetimi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, Zustand seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+Zustand öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **store**: store kavramı Zustand kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zustand öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **selector**: selector kavramı Zustand kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zustand öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **action**: action kavramı Zustand kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zustand öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **middleware**: middleware kavramı Zustand kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zustand öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **persist**: persist kavramı Zustand kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zustand öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **derived state**: derived state kavramı Zustand kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zustand öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **slice pattern**: slice pattern kavramı Zustand kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zustand öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+Zustand kullanılan frontend mimarisinde temel amaç, ekran bazlı dağınık kod yerine yetenek bazlı modüller üretmektir. Component, state, veri çekme, validation, erişilebilirlik ve test sorumlulukları ayrıldığında hem kullanıcı deneyimi hem de geliştirme hızı iyileşir.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Zustand için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```ts
+import { create } from "zustand";
+
+type ThemeStore = {
+  theme: "light" | "dark";
+  setTheme: (theme: "light" | "dark") => void;
+};
+
+export const useThemeStore = create<ThemeStore>((set) => ({
+  theme: "light",
+  setTheme: (theme) => set({ theme }),
+}));
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Bundle** Bundle analizi yapın ve kritik render yolunu ölçün.
+- **Erişilebilirlik** Erişilebilirlik kontrollerini tasarım sisteminin parçası hâline getirin.
+
+## Sık Yapılan Hatalar
+
+- **server state’i store’a taşımak**: server state’i store’a taşımak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **selector kullanmadan tüm store’u dinlemek**: selector kullanmadan tüm store’u dinlemek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **store’u domain çöplüğüne çevirmek**: store’u domain çöplüğüne çevirmek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **persist edilen veriyi migrate etmemek**: persist edilen veriyi migrate etmemek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. Zustand güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+Zustand performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Zustand kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+Zustand için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans) — React konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Tailwind CSS](/blog/tailwind-css-utility-first-tasarim-responsive-layout-ve-tasarim-sistemi) — Tailwind CSS konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Vite](/blog/vite-modern-frontend-build-sistemi-hmr-ve-uretim-optimizasyonu) — Vite konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Turborepo](/blog/turborepo-typescript-monorepo-cache-pipeline-ve-paket-yonetimi) — Turborepo konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [pnpm](/blog/pnpm-hizli-paket-yonetimi-workspace-ve-deterministic-install) — pnpm konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [TanStack Query](/blog/tanstack-query-server-state-cache-mutation-ve-veri-senkronizasyonu) — TanStack Query konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Redux Toolkit](/blog/redux-toolkit-predictable-state-slice-middleware-ve-buyuk-react-uygulamalari) — Redux Toolkit konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [React Hook Form](/blog/react-hook-form-performansli-form-yonetimi-validation-ve-ux) — React Hook Form konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Storybook](/blog/storybook-component-dokumantasyonu-ui-test-ve-tasarim-sistemi) — Storybook konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [ESLint](/blog/eslint-javascript-typescript-kod-kalitesi-kurallar-ve-ci-entegrasyonu) — ESLint konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Prettier](/blog/prettier-otomatik-kod-formatlama-takim-standardi-ve-tooling) — Prettier konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Next.js](/blog/nextjs-app-router-server-components-routing-caching-ve-seo) — Next.js konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin Zustand öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+Zustand, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde Zustand için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, Zustand yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

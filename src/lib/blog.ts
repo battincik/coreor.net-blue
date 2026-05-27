@@ -1,3 +1,6 @@
+import fs from "node:fs"
+import path from "node:path"
+
 export type Post = {
     slug: string
     title: string
@@ -9,70 +12,136 @@ export type Post = {
     mdx?: string
 }
 
-export const POSTS: Post[] = [
-    {
-        slug: "building-resilient-apis",
-        title: "Building Resilient APIs: Practical Patterns",
-        date: "2026-03-10",
-        author: "Zeynep Yilmaz",
-        excerpt: "Designing APIs that stay reliable under load and failure conditions.",
-        tags: ["API", "Architecture", "Backend"],
-        content: `
-### Why resilience matters
+type Frontmatter = {
+    title?: string
+    date?: string
+    author?: string
+    excerpt?: string
+    slug?: string
+    tags?: string[]
+}
 
-Reliable APIs are the backbone of modern products. In this post we cover retry
-strategies, circuit breakers, and idempotency patterns that prevent cascading
-failures.
+const BLOG_DIR = path.join(process.cwd(), "src", "content", "blog")
 
-### Practical steps
+function stripQuotes(value: string) {
+    return value.replace(/^['\"]|['\"]$/g, "").trim()
+}
 
-- Use timeouts and retries with exponential backoff.
-- Add health checks and monitoring.
-- Design idempotent endpoints for safe retries.
+function parseInlineArray(value: string) {
+    const raw = value.trim()
+    if (!raw.startsWith("[") || !raw.endsWith("]")) return []
+    const inner = raw.slice(1, -1).trim()
+    if (!inner) return []
 
-### Summary
+    return inner
+        .split(",")
+        .map((item) => stripQuotes(item.trim()))
+        .filter(Boolean)
+}
 
-Resilience is a combination of design, testing and observability.
-`,
-        mdx: "@/content/blog/building-resilient-apis.mdx",
-    },
-    {
-        slug: "migrating-to-serverless",
-        title: "Migrating to Serverless: When and How",
-        date: "2025-11-04",
-        author: "Can Demir",
-        excerpt: "A pragmatic guide to deciding whether serverless suits your workload.",
-        tags: ["Cloud", "Serverless"],
-        content: `
-Serverless can reduce operational burden but introduces different trade-offs.
+function parseFrontmatter(source: string): { frontmatter: Frontmatter; content: string } {
+    const match = source.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/)
+    if (!match) {
+        return { frontmatter: {}, content: source }
+    }
 
-Key considerations: cold starts, vendor lock-in, cost patterns, and observability.
+    const [, block, body] = match
+    const frontmatter: Frontmatter = {}
+    let listKey: keyof Frontmatter | null = null
 
-We recommend starting with a greenfield component or bursty workloads.
-`,
-        mdx: "@/content/blog/migrating-to-serverless.mdx",
-    },
-    {
-        slug: "designing-for-privacy",
-        title: "Designing for Privacy: Principles and Practices",
-        date: "2025-06-15",
-        author: "Irem Koc",
-        excerpt: "Product-level privacy decisions that balance UX and compliance.",
-        tags: ["Privacy", "Product"],
-        content: `
-Privacy-by-design means minimising data collection, clear consent flows, and
-easy user controls. Use pseudonymization where appropriate and keep data
-retention policies explicit.
-`,
-        mdx: "@/content/blog/designing-for-privacy.mdx",
-    },
-]
+    for (const rawLine of block.split("\n")) {
+        const line = rawLine.trim()
+        if (!line || line.startsWith("#")) continue
+
+        if (line.startsWith("- ") && listKey) {
+            const item = stripQuotes(line.slice(2))
+            const existing = frontmatter[listKey]
+            if (Array.isArray(existing) && item) {
+                existing.push(item)
+            }
+            continue
+        }
+
+        const sep = line.indexOf(":")
+        if (sep === -1) {
+            listKey = null
+            continue
+        }
+
+        const key = line.slice(0, sep).trim() as keyof Frontmatter
+        const rawValue = line.slice(sep + 1).trim()
+
+        if (rawValue === "") {
+            if (key === "tags") {
+                frontmatter.tags = []
+                listKey = "tags"
+            } else {
+                listKey = null
+            }
+            continue
+        }
+
+        listKey = null
+
+        if (key === "tags") {
+            const values = parseInlineArray(rawValue)
+            frontmatter.tags = values
+            continue
+        }
+
+        if (key === "title" || key === "date" || key === "author" || key === "excerpt" || key === "slug") {
+            frontmatter[key] = stripQuotes(rawValue)
+        }
+    }
+
+    return { frontmatter, content: body }
+}
+
+function deriveExcerpt(content: string) {
+    const text = content
+        .replace(/^#.*$/gm, "")
+        .replace(/`{1,3}[\s\S]*?`{1,3}/g, "")
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
+        .replace(/\s+/g, " ")
+        .trim()
+
+    return text.length > 180 ? `${text.slice(0, 177)}...` : text
+}
+
+function getAllPosts(): Post[] {
+    if (!fs.existsSync(BLOG_DIR)) return []
+
+    const files = fs.readdirSync(BLOG_DIR).filter((file) => file.endsWith(".mdx"))
+
+    const posts = files.map((file): Post => {
+        const source = fs.readFileSync(path.join(BLOG_DIR, file), "utf8")
+        const { frontmatter, content } = parseFrontmatter(source)
+        const fallbackSlug = file.replace(/\.mdx$/, "")
+        const slug = frontmatter.slug || fallbackSlug
+
+        return {
+            slug,
+            title: frontmatter.title || slug,
+            date: frontmatter.date || "1970-01-01",
+            author: frontmatter.author || "Coreor Team",
+            excerpt: frontmatter.excerpt || deriveExcerpt(content),
+            tags: frontmatter.tags || [],
+            content,
+            mdx: `@/content/blog/${file}`,
+        }
+    })
+
+    return posts.sort((a, b) => b.date.localeCompare(a.date))
+}
+
+export const POSTS: Post[] = getAllPosts()
 
 export function getPostBySlug(slug: string) {
     try {
         const decoded = decodeURIComponent(slug || "").replace(/\/$/, "").toLowerCase()
         return POSTS.find((p) => p.slug.toLowerCase() === decoded || p.slug === slug) || null
-    } catch (e) {
+    } catch {
         return POSTS.find((p) => p.slug === slug) || null
     }
 }

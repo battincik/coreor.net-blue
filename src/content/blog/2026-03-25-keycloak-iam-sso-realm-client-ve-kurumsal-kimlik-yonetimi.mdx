@@ -1,0 +1,164 @@
+---
+title: "Keycloak Rehberi: IAM, SSO, Realm, Client ve Kurumsal Kimlik Yönetimi"
+date: "2026-03-25"
+author: "Coreor Team"
+tags: ["Keycloak", "IAM", "SSO", "Security"]
+excerpt: "Keycloak ile self-hosted identity provider, realm, client, role, group, SSO, OAuth 2.0 ve OpenID Connect entegrasyonlarını öğrenin."
+slug: "keycloak-iam-sso-realm-client-ve-kurumsal-kimlik-yonetimi"
+canonical: "/blog/keycloak-iam-sso-realm-client-ve-kurumsal-kimlik-yonetimi"
+keywords: ["Keycloak", "Keycloak rehberi", "Keycloak nedir", "Keycloak best practices", "Keycloak örnekleri", "IAM", "SSO", "Security"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "security"
+related:
+  - "oauth-2-0-authorization-flow-access-token-ve-guvenli-yetkilendirme"
+  - "openid-connect-identity-layer-id-token-claims-ve-sso"
+  - "jwt-token-tabanli-kimlik-dogrulama-guvenlik-ve-refresh-token"
+  - "passport-js-node-js-authentication-strategy-session-ve-jwt-entegrasyonu"
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "docker-container-image-compose-ve-uretim-hazirligi"
+  - "opentelemetry-trace-metric-log-ve-vendor-neutral-observability"
+  - "clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu"
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+  - "nextjs-app-router-server-components-routing-caching-ve-seo"
+---
+# Keycloak Rehberi: IAM, SSO, Realm, Client ve Kurumsal Kimlik Yönetimi
+
+Keycloak, modern yazılım geliştirme ekosisteminde **kurumsal kimlik ve erişim yönetimi platformu** için kullanılan önemli başlıklardan biridir. Bu yazı, Keycloak konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle SSO, enterprise auth ve çok uygulamalı erişim yönetimi kuran ekipler için hazırlandı. Amaç, yazıyı okuyan kişinin Keycloak hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** Keycloak
+- **Arama niyeti:** Keycloak nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde security kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+Keycloak, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **Keycloak kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+Keycloak özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **enterprise SSO**: enterprise SSO senaryosunda Keycloak, kurumsal kimlik ve erişim yönetimi platformu ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **internal tool login**: internal tool login senaryosunda Keycloak, kurumsal kimlik ve erişim yönetimi platformu ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **multi-app auth**: multi-app auth senaryosunda Keycloak, kurumsal kimlik ve erişim yönetimi platformu ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **LDAP entegrasyonu**: LDAP entegrasyonu senaryosunda Keycloak, kurumsal kimlik ve erişim yönetimi platformu ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **role based access**: role based access senaryosunda Keycloak, kurumsal kimlik ve erişim yönetimi platformu ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, Keycloak seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+Keycloak öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **realm**: realm kavramı Keycloak kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Keycloak öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **client**: client kavramı Keycloak kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Keycloak öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **role**: role kavramı Keycloak kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Keycloak öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **group**: group kavramı Keycloak kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Keycloak öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **identity provider**: identity provider kavramı Keycloak kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Keycloak öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **user federation**: user federation kavramı Keycloak kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Keycloak öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **token mapper**: token mapper kavramı Keycloak kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Keycloak öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+Keycloak güvenlik mimarisinde tek başına yeterli değildir; token yaşam döngüsü, session stratejisi, yetkilendirme modeli, audit log ve secret yönetimi birlikte ele alınmalıdır.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Keycloak için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```txt
+Realm: coreor
+Client: coreor-web
+Flow: Authorization Code + PKCE
+Roles: admin, editor, viewer
+Groups: engineering, support, finance
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Token,** Token, session ve permission kararlarını threat model üzerinden doğrulayın.
+- **PII** PII ve secret verilerin loglara düşmesini engelleyin.
+
+## Sık Yapılan Hatalar
+
+- **realm modelini plansız büyütmek**: realm modelini plansız büyütmek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **client secret yönetimini hafife almak**: client secret yönetimini hafife almak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **role sayısını kontrolsüz çoğaltmak**: role sayısını kontrolsüz çoğaltmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **token claim şişmesi üretmek**: token claim şişmesi üretmek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. Keycloak güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+Keycloak performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Keycloak kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+Keycloak için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [OAuth 2.0](/blog/oauth-2-0-authorization-flow-access-token-ve-guvenli-yetkilendirme) — OAuth 2.0 konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [OpenID Connect](/blog/openid-connect-identity-layer-id-token-claims-ve-sso) — OpenID Connect konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [JWT](/blog/jwt-token-tabanli-kimlik-dogrulama-guvenlik-ve-refresh-token) — JWT konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [Passport.js](/blog/passport-js-node-js-authentication-strategy-session-ve-jwt-entegrasyonu) — Passport.js konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Docker](/blog/docker-container-image-compose-ve-uretim-hazirligi) — Docker konusu deploy, release, otomasyon, container yönetimi ve platform standartlarıyla doğrudan ilişkilidir.
+- [OpenTelemetry](/blog/opentelemetry-trace-metric-log-ve-vendor-neutral-observability) — OpenTelemetry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Clean Architecture](/blog/clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu) — Clean Architecture konusu servis sınırları, domain modelleme, bağımlılık yönü ve uzun vadeli bakım maliyetiyle doğrudan ilişkilidir.
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans) — React konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Next.js](/blog/nextjs-app-router-server-components-routing-caching-ve-seo) — Next.js konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin Keycloak öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+Keycloak, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde Keycloak için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, Keycloak yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

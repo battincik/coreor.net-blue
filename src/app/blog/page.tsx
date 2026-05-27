@@ -1,4 +1,3 @@
-"use client"
 import Link from "next/link"
 import { POSTS } from "@/lib/blog"
 import { Badge } from "@/components/ui/badge"

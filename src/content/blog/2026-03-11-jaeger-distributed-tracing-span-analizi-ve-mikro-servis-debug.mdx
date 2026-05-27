@@ -1,0 +1,164 @@
+---
+title: "Jaeger Rehberi: Distributed Tracing, Span Analizi ve Mikro Servis Debug"
+date: "2026-03-11"
+author: "Coreor Team"
+tags: ["Jaeger", "Tracing", "Observability", "Microservices"]
+excerpt: "Jaeger ile distributed tracing, trace/span analizi, servis bağımlılığı görünürlüğü ve mikro servis performans debug süreçlerini öğrenin."
+slug: "jaeger-distributed-tracing-span-analizi-ve-mikro-servis-debug"
+canonical: "/blog/jaeger-distributed-tracing-span-analizi-ve-mikro-servis-debug"
+keywords: ["Jaeger", "Jaeger rehberi", "Jaeger nedir", "Jaeger best practices", "Jaeger örnekleri", "Tracing", "Observability", "Microservices"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "observability"
+related:
+  - "grafana-dashboard-data-source-alerting-ve-observability-ux"
+  - "opentelemetry-trace-metric-log-ve-vendor-neutral-observability"
+  - "prometheus-metric-toplama-promql-alert-ve-slo-izleme"
+  - "new-relic-apm-distributed-tracing-log-ve-performans-analizi"
+  - "loki-log-aggregation-label-stratejisi-ve-grafana-entegrasyonu"
+  - "sentry-error-tracking-release-health-ve-frontend-backend-izleme"
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "docker-container-image-compose-ve-uretim-hazirligi"
+  - "clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu"
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+---
+# Jaeger Rehberi: Distributed Tracing, Span Analizi ve Mikro Servis Debug
+
+Jaeger, modern yazılım geliştirme ekosisteminde **distributed tracing depolama ve analiz aracı** için kullanılan önemli başlıklardan biridir. Bu yazı, Jaeger konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle mikro servislerde gecikme ve bağımlılık problemlerini analiz eden ekipler için hazırlandı. Amaç, yazıyı okuyan kişinin Jaeger hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** Jaeger
+- **Arama niyeti:** Jaeger nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde observability kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+Jaeger, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **Jaeger kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+Jaeger özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **latency debug**: latency debug senaryosunda Jaeger, distributed tracing depolama ve analiz aracı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **N+1 servis çağrısı analizi**: N+1 servis çağrısı analizi senaryosunda Jaeger, distributed tracing depolama ve analiz aracı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **incident response**: incident response senaryosunda Jaeger, distributed tracing depolama ve analiz aracı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **dependency map**: dependency map senaryosunda Jaeger, distributed tracing depolama ve analiz aracı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **SLO ihlali araştırması**: SLO ihlali araştırması senaryosunda Jaeger, distributed tracing depolama ve analiz aracı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, Jaeger seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+Jaeger öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **trace**: trace kavramı Jaeger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Jaeger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **span**: span kavramı Jaeger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Jaeger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **operation**: operation kavramı Jaeger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Jaeger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **service dependency**: service dependency kavramı Jaeger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Jaeger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **sampling**: sampling kavramı Jaeger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Jaeger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **collector**: collector kavramı Jaeger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Jaeger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **query UI**: query UI kavramı Jaeger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Jaeger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+Jaeger gözlemlenebilirlik mimarisinde sinyal kalitesini artırır. Amaç daha fazla veri toplamak değil; incident sırasında doğru soruya hızlı cevap verebilecek veri toplamaktır.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Jaeger için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```txt
+Trace: checkout-request
+  Span: api.validate-cart
+  Span: inventory.reserve
+  Span: payment.charge
+  Span: invoice.create
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Alertleri** Alertleri kullanıcı etkisi ve SLO ile ilişkilendirin.
+- **Cardinality** Cardinality ve retention maliyetlerini kontrol edin.
+
+## Sık Yapılan Hatalar
+
+- **span isimlerini rastgele bırakmak**: span isimlerini rastgele bırakmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **sampling’i iş kritikliğiyle bağlamamak**: sampling’i iş kritikliğiyle bağlamamak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **trace context’i servisler arasında taşımamak**: trace context’i servisler arasında taşımamak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **trace’i log korelasyonu olmadan kullanmak**: trace’i log korelasyonu olmadan kullanmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. Jaeger güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+Jaeger performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Jaeger kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+Jaeger için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [Grafana](/blog/grafana-dashboard-data-source-alerting-ve-observability-ux) — Grafana konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [OpenTelemetry](/blog/opentelemetry-trace-metric-log-ve-vendor-neutral-observability) — OpenTelemetry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Prometheus](/blog/prometheus-metric-toplama-promql-alert-ve-slo-izleme) — Prometheus konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [New Relic](/blog/new-relic-apm-distributed-tracing-log-ve-performans-analizi) — New Relic konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Loki](/blog/loki-log-aggregation-label-stratejisi-ve-grafana-entegrasyonu) — Loki konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Sentry](/blog/sentry-error-tracking-release-health-ve-frontend-backend-izleme) — Sentry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Docker](/blog/docker-container-image-compose-ve-uretim-hazirligi) — Docker konusu deploy, release, otomasyon, container yönetimi ve platform standartlarıyla doğrudan ilişkilidir.
+- [Clean Architecture](/blog/clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu) — Clean Architecture konusu servis sınırları, domain modelleme, bağımlılık yönü ve uzun vadeli bakım maliyetiyle doğrudan ilişkilidir.
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans) — React konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin Jaeger öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+Jaeger, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde Jaeger için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, Jaeger yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

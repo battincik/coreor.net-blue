@@ -54,8 +54,8 @@ export default async function BlogPost({ params }: Props) {
           ))}
         </div>
 
-        <article className="prose prose-invert max-w-none text-muted-foreground">
-          {post.content.split('\n').map((line, i) => {
+        <article className="prose max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary">
+          {MDXContent ? <MDXContent /> : post.content.split('\n').map((line, i) => {
             const trimmed = line.trim()
             if (!trimmed) return <div key={i} className="h-2" />
             if (trimmed.startsWith('###')) {

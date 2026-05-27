@@ -7,12 +7,21 @@ excerpt: "TypeScript ile daha güvenilir, okunabilir ve ölçeklenebilir uygulam
 slug: "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
 canonical: "/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
 keywords: ["TypeScript", "TypeScript rehberi", "TypeScript nedir", "TypeScript örnekleri", "TypeScript best practices", "JavaScript", "Static Typing"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "frontend"
 related:
-  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
-  - "node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri"
-  - "nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend"
+  - "zod-typescript-runtime-validation-schema-ve-guvenli-veri-sinirlari"
   - "trpc-typescript-ile-uctan-uca-tip-guvenli-api-gelistirme"
+  - "nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend"
   - "prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani"
+  - "turborepo-typescript-monorepo-cache-pipeline-ve-paket-yonetimi"
+  - "pnpm-hizli-paket-yonetimi-workspace-ve-deterministic-install"
+  - "vitest-vite-uyumlu-unit-test-mock-ve-typescript-testleri"
+  - "eslint-javascript-typescript-kod-kalitesi-kurallar-ve-ci-entegrasyonu"
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+  - "nextjs-app-router-server-components-routing-caching-ve-seo"
+  - "tailwind-css-utility-first-tasarim-responsive-layout-ve-tasarim-sistemi"
+  - "vite-modern-frontend-build-sistemi-hmr-ve-uretim-optimizasyonu"
 ---
 
 # TypeScript Rehberi: Tip Güvenliği, Generic Yapılar ve Ölçeklenebilir Kod
@@ -161,13 +170,20 @@ Bakım tarafında ise şu yaklaşım güçlüdür:
 
 ## İlgili Yazılar
 
-- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans)
-- [Node.js](/blog/node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri)
-- [NestJS](/blog/nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend)
-- [tRPC](/blog/trpc-typescript-ile-uctan-uca-tip-guvenli-api-gelistirme)
-- [Prisma](/blog/prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani)
+- [Zod](/blog/zod-typescript-runtime-validation-schema-ve-guvenli-veri-sinirlari) — Zod konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [tRPC](/blog/trpc-typescript-ile-uctan-uca-tip-guvenli-api-gelistirme) — tRPC konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [NestJS](/blog/nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend) — NestJS konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Prisma](/blog/prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani) — Prisma konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Turborepo](/blog/turborepo-typescript-monorepo-cache-pipeline-ve-paket-yonetimi) — Turborepo konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [pnpm](/blog/pnpm-hizli-paket-yonetimi-workspace-ve-deterministic-install) — pnpm konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Vitest](/blog/vitest-vite-uyumlu-unit-test-mock-ve-typescript-testleri) — Vitest konusu kalite güvencesi, regresyon kontrolü, CI entegrasyonu ve güvenli refactor süreçleriyle doğrudan ilişkilidir.
+- [ESLint](/blog/eslint-javascript-typescript-kod-kalitesi-kurallar-ve-ci-entegrasyonu) — ESLint konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans) — React konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Next.js](/blog/nextjs-app-router-server-components-routing-caching-ve-seo) — Next.js konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Tailwind CSS](/blog/tailwind-css-utility-first-tasarim-responsive-layout-ve-tasarim-sistemi) — Tailwind CSS konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Vite](/blog/vite-modern-frontend-build-sistemi-hmr-ve-uretim-optimizasyonu) — Vite konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
 
-Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Örneğin TypeScript öğrenen bir okuyucu, sonraki adımda hangi teknolojiyi gerçekten merak edecekse link oraya gitmelidir.
+Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Bu seri içinde her yazı; frontend, backend, veri, güvenlik, DevOps, cloud, observability, test ve mimari başlıklarıyla çapraz ilişkilendirilmiştir.
 
 ## Sonuç
 

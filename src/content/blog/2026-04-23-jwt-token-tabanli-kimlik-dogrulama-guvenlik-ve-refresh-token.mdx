@@ -7,11 +7,19 @@ excerpt: "JWT ile access token, refresh token, claim tasarımı, imza doğrulama
 slug: "jwt-token-tabanli-kimlik-dogrulama-guvenlik-ve-refresh-token"
 canonical: "/blog/jwt-token-tabanli-kimlik-dogrulama-guvenlik-ve-refresh-token"
 keywords: ["JWT", "JWT rehberi", "JWT nedir", "JWT örnekleri", "JWT best practices", "Authentication", "Security"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "security"
 related:
-  - "node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri"
-  - "expressjs-minimal-api-middleware-zinciri-ve-uretim-hazirligi"
-  - "nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend"
-  - "graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi"
+  - "oauth-2-0-authorization-flow-access-token-ve-guvenli-yetkilendirme"
+  - "openid-connect-identity-layer-id-token-claims-ve-sso"
+  - "passport-js-node-js-authentication-strategy-session-ve-jwt-entegrasyonu"
+  - "keycloak-iam-sso-realm-client-ve-kurumsal-kimlik-yonetimi"
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "docker-container-image-compose-ve-uretim-hazirligi"
+  - "opentelemetry-trace-metric-log-ve-vendor-neutral-observability"
+  - "clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu"
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+  - "nextjs-app-router-server-components-routing-caching-ve-seo"
 ---
 
 # JWT Rehberi: Token Tabanlı Kimlik Doğrulama, Güvenlik ve Refresh Token
@@ -155,12 +163,18 @@ Bakım tarafında ise şu yaklaşım güçlüdür:
 
 ## İlgili Yazılar
 
-- [Node.js](/blog/node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri)
-- [Express.js](/blog/expressjs-minimal-api-middleware-zinciri-ve-uretim-hazirligi)
-- [NestJS](/blog/nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend)
-- [GraphQL](/blog/graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi)
+- [OAuth 2.0](/blog/oauth-2-0-authorization-flow-access-token-ve-guvenli-yetkilendirme) — OAuth 2.0 konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [OpenID Connect](/blog/openid-connect-identity-layer-id-token-claims-ve-sso) — OpenID Connect konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [Passport.js](/blog/passport-js-node-js-authentication-strategy-session-ve-jwt-entegrasyonu) — Passport.js konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [Keycloak](/blog/keycloak-iam-sso-realm-client-ve-kurumsal-kimlik-yonetimi) — Keycloak konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Docker](/blog/docker-container-image-compose-ve-uretim-hazirligi) — Docker konusu deploy, release, otomasyon, container yönetimi ve platform standartlarıyla doğrudan ilişkilidir.
+- [OpenTelemetry](/blog/opentelemetry-trace-metric-log-ve-vendor-neutral-observability) — OpenTelemetry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Clean Architecture](/blog/clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu) — Clean Architecture konusu servis sınırları, domain modelleme, bağımlılık yönü ve uzun vadeli bakım maliyetiyle doğrudan ilişkilidir.
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans) — React konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Next.js](/blog/nextjs-app-router-server-components-routing-caching-ve-seo) — Next.js konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
 
-Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Örneğin JWT öğrenen bir okuyucu, sonraki adımda hangi teknolojiyi gerçekten merak edecekse link oraya gitmelidir.
+Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Bu seri içinde her yazı; frontend, backend, veri, güvenlik, DevOps, cloud, observability, test ve mimari başlıklarıyla çapraz ilişkilendirilmiştir.
 
 ## Sonuç
 

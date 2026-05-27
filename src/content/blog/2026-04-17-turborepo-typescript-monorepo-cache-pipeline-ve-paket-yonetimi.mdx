@@ -1,0 +1,171 @@
+---
+title: "Turborepo Rehberi: TypeScript Monorepo, Cache, Pipeline ve Paket Yönetimi"
+date: "2026-04-17"
+author: "Coreor Team"
+tags: ["Turborepo", "Monorepo", "TypeScript", "Build Tools"]
+excerpt: "Turborepo ile frontend ve backend paketlerini tek depoda yönetmek, build cache kurmak, pipeline tasarlamak ve ekip ölçeğinde monorepo işletmek için rehber."
+slug: "turborepo-typescript-monorepo-cache-pipeline-ve-paket-yonetimi"
+canonical: "/blog/turborepo-typescript-monorepo-cache-pipeline-ve-paket-yonetimi"
+keywords: ["Turborepo", "Turborepo rehberi", "Turborepo nedir", "Turborepo best practices", "Turborepo örnekleri", "Monorepo", "TypeScript", "Build Tools"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "frontend"
+related:
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+  - "nextjs-app-router-server-components-routing-caching-ve-seo"
+  - "tailwind-css-utility-first-tasarim-responsive-layout-ve-tasarim-sistemi"
+  - "vite-modern-frontend-build-sistemi-hmr-ve-uretim-optimizasyonu"
+  - "pnpm-hizli-paket-yonetimi-workspace-ve-deterministic-install"
+  - "tanstack-query-server-state-cache-mutation-ve-veri-senkronizasyonu"
+  - "zustand-basit-react-state-yonetimi-store-tasarimi-ve-performans"
+  - "redux-toolkit-predictable-state-slice-middleware-ve-buyuk-react-uygulamalari"
+  - "react-hook-form-performansli-form-yonetimi-validation-ve-ux"
+  - "storybook-component-dokumantasyonu-ui-test-ve-tasarim-sistemi"
+  - "eslint-javascript-typescript-kod-kalitesi-kurallar-ve-ci-entegrasyonu"
+---
+# Turborepo Rehberi: TypeScript Monorepo, Cache, Pipeline ve Paket Yönetimi
+
+Turborepo, modern yazılım geliştirme ekosisteminde **monorepo orkestrasyonu ve görev cache sistemi** için kullanılan önemli başlıklardan biridir. Bu yazı, Turborepo konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle çok paketli TypeScript projeleri yöneten ürün ve platform ekipleri için hazırlandı. Amaç, yazıyı okuyan kişinin Turborepo hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** Turborepo
+- **Arama niyeti:** Turborepo nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde frontend kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+Turborepo, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **Turborepo kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+Turborepo özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **frontend/backend monorepo**: frontend/backend monorepo senaryosunda Turborepo, monorepo orkestrasyonu ve görev cache sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **shared UI paketi**: shared UI paketi senaryosunda Turborepo, monorepo orkestrasyonu ve görev cache sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **SDK geliştirme**: SDK geliştirme senaryosunda Turborepo, monorepo orkestrasyonu ve görev cache sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **mikro frontend hazırlığı**: mikro frontend hazırlığı senaryosunda Turborepo, monorepo orkestrasyonu ve görev cache sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **çok uygulamalı SaaS kod tabanı**: çok uygulamalı SaaS kod tabanı senaryosunda Turborepo, monorepo orkestrasyonu ve görev cache sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, Turborepo seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+Turborepo öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **workspace**: workspace kavramı Turborepo kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Turborepo öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **task pipeline**: task pipeline kavramı Turborepo kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Turborepo öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **remote cache**: remote cache kavramı Turborepo kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Turborepo öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **package boundary**: package boundary kavramı Turborepo kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Turborepo öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **incremental build**: incremental build kavramı Turborepo kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Turborepo öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **dependency graph**: dependency graph kavramı Turborepo kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Turborepo öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **affected tasks**: affected tasks kavramı Turborepo kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Turborepo öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+Turborepo kullanılan frontend mimarisinde temel amaç, ekran bazlı dağınık kod yerine yetenek bazlı modüller üretmektir. Component, state, veri çekme, validation, erişilebilirlik ve test sorumlulukları ayrıldığında hem kullanıcı deneyimi hem de geliştirme hızı iyileşir.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Turborepo için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".next/**"] },
+    "test": { "dependsOn": ["build"], "outputs": [] },
+    "lint": { "outputs": [] }
+  }
+}
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Bundle** Bundle analizi yapın ve kritik render yolunu ölçün.
+- **Erişilebilirlik** Erişilebilirlik kontrollerini tasarım sisteminin parçası hâline getirin.
+
+## Sık Yapılan Hatalar
+
+- **her paketi birbirine bağımlı yapmak**: her paketi birbirine bağımlı yapmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **cache invalidation kuralını anlamamak**: cache invalidation kuralını anlamamak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **build çıktısını source ile karıştırmak**: build çıktısını source ile karıştırmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **package boundary testleri yazmamak**: package boundary testleri yazmamak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. Turborepo güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+Turborepo performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Turborepo kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+Turborepo için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans) — React konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Next.js](/blog/nextjs-app-router-server-components-routing-caching-ve-seo) — Next.js konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Tailwind CSS](/blog/tailwind-css-utility-first-tasarim-responsive-layout-ve-tasarim-sistemi) — Tailwind CSS konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Vite](/blog/vite-modern-frontend-build-sistemi-hmr-ve-uretim-optimizasyonu) — Vite konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [pnpm](/blog/pnpm-hizli-paket-yonetimi-workspace-ve-deterministic-install) — pnpm konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [TanStack Query](/blog/tanstack-query-server-state-cache-mutation-ve-veri-senkronizasyonu) — TanStack Query konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Zustand](/blog/zustand-basit-react-state-yonetimi-store-tasarimi-ve-performans) — Zustand konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Redux Toolkit](/blog/redux-toolkit-predictable-state-slice-middleware-ve-buyuk-react-uygulamalari) — Redux Toolkit konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [React Hook Form](/blog/react-hook-form-performansli-form-yonetimi-validation-ve-ux) — React Hook Form konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Storybook](/blog/storybook-component-dokumantasyonu-ui-test-ve-tasarim-sistemi) — Storybook konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [ESLint](/blog/eslint-javascript-typescript-kod-kalitesi-kurallar-ve-ci-entegrasyonu) — ESLint konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin Turborepo öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+Turborepo, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde Turborepo için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, Turborepo yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

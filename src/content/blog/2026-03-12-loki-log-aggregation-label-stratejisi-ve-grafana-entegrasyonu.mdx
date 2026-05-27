@@ -1,0 +1,162 @@
+---
+title: "Loki Rehberi: Log Aggregation, Label Stratejisi ve Grafana Entegrasyonu"
+date: "2026-03-12"
+author: "Coreor Team"
+tags: ["Loki", "Logging", "Grafana", "Observability"]
+excerpt: "Loki ile maliyet kontrollü log toplama, label stratejisi, LogQL, Grafana entegrasyonu ve Kubernetes log görünürlüğünü öğrenin."
+slug: "loki-log-aggregation-label-stratejisi-ve-grafana-entegrasyonu"
+canonical: "/blog/loki-log-aggregation-label-stratejisi-ve-grafana-entegrasyonu"
+keywords: ["Loki", "Loki rehberi", "Loki nedir", "Loki best practices", "Loki örnekleri", "Logging", "Grafana", "Observability"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "observability"
+related:
+  - "prometheus-metric-toplama-promql-alert-ve-slo-izleme"
+  - "grafana-dashboard-data-source-alerting-ve-observability-ux"
+  - "new-relic-apm-distributed-tracing-log-ve-performans-analizi"
+  - "jaeger-distributed-tracing-span-analizi-ve-mikro-servis-debug"
+  - "sentry-error-tracking-release-health-ve-frontend-backend-izleme"
+  - "opentelemetry-trace-metric-log-ve-vendor-neutral-observability"
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "docker-container-image-compose-ve-uretim-hazirligi"
+  - "clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu"
+  - "react-modern-ui-mimarisi-hooks-server-components-ve-performans"
+---
+# Loki Rehberi: Log Aggregation, Label Stratejisi ve Grafana Entegrasyonu
+
+Loki, modern yazılım geliştirme ekosisteminde **label tabanlı log aggregation sistemi** için kullanılan önemli başlıklardan biridir. Bu yazı, Loki konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle Kubernetes ve mikro servis loglarını merkezi izlemek isteyen platform ekipleri için hazırlandı. Amaç, yazıyı okuyan kişinin Loki hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** Loki
+- **Arama niyeti:** Loki nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde observability kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+Loki, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **Loki kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+Loki özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **Kubernetes logları**: Kubernetes logları senaryosunda Loki, label tabanlı log aggregation sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **incident analizi**: incident analizi senaryosunda Loki, label tabanlı log aggregation sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **uygulama hata araştırması**: uygulama hata araştırması senaryosunda Loki, label tabanlı log aggregation sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **audit yardımcı logları**: audit yardımcı logları senaryosunda Loki, label tabanlı log aggregation sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **Grafana dashboard bağlantısı**: Grafana dashboard bağlantısı senaryosunda Loki, label tabanlı log aggregation sistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, Loki seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+Loki öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **label**: label kavramı Loki kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Loki öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **stream**: stream kavramı Loki kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Loki öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **LogQL**: LogQL kavramı Loki kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Loki öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **promtail**: promtail kavramı Loki kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Loki öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **retention**: retention kavramı Loki kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Loki öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **tenant**: tenant kavramı Loki kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Loki öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **Grafana data source**: Grafana data source kavramı Loki kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Loki öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+Loki gözlemlenebilirlik mimarisinde sinyal kalitesini artırır. Amaç daha fazla veri toplamak değil; incident sırasında doğru soruya hızlı cevap verebilecek veri toplamaktır.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Loki için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```logql
+{app="api", namespace="production"} |= "error"
+| json
+| status >= 500
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Alertleri** Alertleri kullanıcı etkisi ve SLO ile ilişkilendirin.
+- **Cardinality** Cardinality ve retention maliyetlerini kontrol edin.
+
+## Sık Yapılan Hatalar
+
+- **yüksek cardinality label kullanmak**: yüksek cardinality label kullanmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **logları metrik yerine kullanmak**: logları metrik yerine kullanmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **PII maskelememek**: PII maskelememek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **retention politikasını belirsiz bırakmak**: retention politikasını belirsiz bırakmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. Loki güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+Loki performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Loki kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+Loki için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [Prometheus](/blog/prometheus-metric-toplama-promql-alert-ve-slo-izleme) — Prometheus konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Grafana](/blog/grafana-dashboard-data-source-alerting-ve-observability-ux) — Grafana konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [New Relic](/blog/new-relic-apm-distributed-tracing-log-ve-performans-analizi) — New Relic konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Jaeger](/blog/jaeger-distributed-tracing-span-analizi-ve-mikro-servis-debug) — Jaeger konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Sentry](/blog/sentry-error-tracking-release-health-ve-frontend-backend-izleme) — Sentry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [OpenTelemetry](/blog/opentelemetry-trace-metric-log-ve-vendor-neutral-observability) — OpenTelemetry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Docker](/blog/docker-container-image-compose-ve-uretim-hazirligi) — Docker konusu deploy, release, otomasyon, container yönetimi ve platform standartlarıyla doğrudan ilişkilidir.
+- [Clean Architecture](/blog/clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu) — Clean Architecture konusu servis sınırları, domain modelleme, bağımlılık yönü ve uzun vadeli bakım maliyetiyle doğrudan ilişkilidir.
+- [React](/blog/react-modern-ui-mimarisi-hooks-server-components-ve-performans) — React konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin Loki öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+Loki, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde Loki için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, Loki yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

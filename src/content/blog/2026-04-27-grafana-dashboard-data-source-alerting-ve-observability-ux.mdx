@@ -7,10 +7,21 @@ excerpt: "Grafana ile metrik, log ve trace verilerini anlamlı dashboard'lara d�
 slug: "grafana-dashboard-data-source-alerting-ve-observability-ux"
 canonical: "/blog/grafana-dashboard-data-source-alerting-ve-observability-ux"
 keywords: ["Grafana", "Grafana rehberi", "Grafana nedir", "Grafana örnekleri", "Grafana best practices", "Observability", "Dashboards"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "observability"
 related:
-  - "prometheus-metric-toplama-promql-alert-ve-slo-izleme"
-  - "new-relic-apm-distributed-tracing-log-ve-performans-analizi"
   - "elasticsearch-full-text-search-mapping-analyzer-ve-performans"
+  - "clickhouse-kolon-bazli-analitik-veritabani-olap-ve-yuksek-hacimli-sorgular"
+  - "kubernetes-pod-deployment-service-config-ve-olcekleme"
+  - "prometheus-metric-toplama-promql-alert-ve-slo-izleme"
+  - "loki-log-aggregation-label-stratejisi-ve-grafana-entegrasyonu"
+  - "jaeger-distributed-tracing-span-analizi-ve-mikro-servis-debug"
+  - "new-relic-apm-distributed-tracing-log-ve-performans-analizi"
+  - "opentelemetry-trace-metric-log-ve-vendor-neutral-observability"
+  - "sentry-error-tracking-release-health-ve-frontend-backend-izleme"
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "docker-container-image-compose-ve-uretim-hazirligi"
+  - "clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu"
 ---
 
 # Grafana Rehberi: Dashboard, Data Source, Alerting ve Observability UX
@@ -154,11 +165,20 @@ Bakım tarafında ise şu yaklaşım güçlüdür:
 
 ## İlgili Yazılar
 
-- [Prometheus](/blog/prometheus-metric-toplama-promql-alert-ve-slo-izleme)
-- [New Relic](/blog/new-relic-apm-distributed-tracing-log-ve-performans-analizi)
-- [Elasticsearch](/blog/elasticsearch-full-text-search-mapping-analyzer-ve-performans)
+- [Elasticsearch](/blog/elasticsearch-full-text-search-mapping-analyzer-ve-performans) — Elasticsearch konusu aynı teknik karar zincirinin parçasıdır.
+- [ClickHouse](/blog/clickhouse-kolon-bazli-analitik-veritabani-olap-ve-yuksek-hacimli-sorgular) — ClickHouse konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Kubernetes](/blog/kubernetes-pod-deployment-service-config-ve-olcekleme) — Kubernetes konusu deploy, release, otomasyon, container yönetimi ve platform standartlarıyla doğrudan ilişkilidir.
+- [Prometheus](/blog/prometheus-metric-toplama-promql-alert-ve-slo-izleme) — Prometheus konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Loki](/blog/loki-log-aggregation-label-stratejisi-ve-grafana-entegrasyonu) — Loki konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Jaeger](/blog/jaeger-distributed-tracing-span-analizi-ve-mikro-servis-debug) — Jaeger konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [New Relic](/blog/new-relic-apm-distributed-tracing-log-ve-performans-analizi) — New Relic konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [OpenTelemetry](/blog/opentelemetry-trace-metric-log-ve-vendor-neutral-observability) — OpenTelemetry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [Sentry](/blog/sentry-error-tracking-release-health-ve-frontend-backend-izleme) — Sentry konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Docker](/blog/docker-container-image-compose-ve-uretim-hazirligi) — Docker konusu deploy, release, otomasyon, container yönetimi ve platform standartlarıyla doğrudan ilişkilidir.
+- [Clean Architecture](/blog/clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu) — Clean Architecture konusu servis sınırları, domain modelleme, bağımlılık yönü ve uzun vadeli bakım maliyetiyle doğrudan ilişkilidir.
 
-Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Örneğin Grafana öğrenen bir okuyucu, sonraki adımda hangi teknolojiyi gerçekten merak edecekse link oraya gitmelidir.
+Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Bu seri içinde her yazı; frontend, backend, veri, güvenlik, DevOps, cloud, observability, test ve mimari başlıklarıyla çapraz ilişkilendirilmiştir.
 
 ## Sonuç
 

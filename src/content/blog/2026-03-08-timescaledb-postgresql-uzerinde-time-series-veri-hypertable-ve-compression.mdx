@@ -1,0 +1,169 @@
+---
+title: "TimescaleDB Rehberi: PostgreSQL Üzerinde Time-Series Veri, Hypertable ve Compression"
+date: "2026-03-08"
+author: "Coreor Team"
+tags: ["TimescaleDB", "PostgreSQL", "Time Series", "Database"]
+excerpt: "TimescaleDB ile PostgreSQL üzerinde zaman serisi veri modelleme, hypertable, continuous aggregate, retention ve compression stratejilerini öğrenin."
+slug: "timescaledb-postgresql-uzerinde-time-series-veri-hypertable-ve-compression"
+canonical: "/blog/timescaledb-postgresql-uzerinde-time-series-veri-hypertable-ve-compression"
+keywords: ["TimescaleDB", "TimescaleDB rehberi", "TimescaleDB nedir", "TimescaleDB best practices", "TimescaleDB örnekleri", "PostgreSQL", "Time Series", "Database"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "data"
+related:
+  - "postgresql-iliskisel-modelleme-index-transaction-ve-performans"
+  - "prometheus-metric-toplama-promql-alert-ve-slo-izleme"
+  - "mongodb-document-modelleme-aggregation-ve-index-stratejileri"
+  - "mysql-iliskisel-tasarim-innodb-index-ve-replikasyon"
+  - "sqlite-gomulu-veritabani-lokal-depolama-ve-edge-kullanimlari"
+  - "cassandra-dagitik-nosql-partition-key-ve-yuksek-yazma-trafigi"
+  - "prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani"
+  - "supabase-postgres-auth-realtime-ve-row-level-security"
+  - "clickhouse-kolon-bazli-analitik-veritabani-olap-ve-yuksek-hacimli-sorgular"
+  - "neo4j-graph-database-cypher-iliski-modelleme-ve-use-case-tasarimi"
+  - "minio-s3-uyumlu-object-storage-bucket-policy-ve-self-hosted-dosya-yonetimi"
+  - "redis-cache-queue-rate-limit-ve-realtime-veri-yapilari"
+---
+# TimescaleDB Rehberi: PostgreSQL Üzerinde Time-Series Veri, Hypertable ve Compression
+
+TimescaleDB, modern yazılım geliştirme ekosisteminde **PostgreSQL tabanlı time-series veritabanı uzantısı** için kullanılan önemli başlıklardan biridir. Bu yazı, TimescaleDB konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle metric, IoT, finansal zaman serisi ve telemetry verisi saklayan ekipler için hazırlandı. Amaç, yazıyı okuyan kişinin TimescaleDB hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** TimescaleDB
+- **Arama niyeti:** TimescaleDB nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde data kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+TimescaleDB, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **TimescaleDB kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+TimescaleDB özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **IoT telemetry**: IoT telemetry senaryosunda TimescaleDB, PostgreSQL tabanlı time-series veritabanı uzantısı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **metric storage**: metric storage senaryosunda TimescaleDB, PostgreSQL tabanlı time-series veritabanı uzantısı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **finansal veri**: finansal veri senaryosunda TimescaleDB, PostgreSQL tabanlı time-series veritabanı uzantısı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **sensor verisi**: sensor verisi senaryosunda TimescaleDB, PostgreSQL tabanlı time-series veritabanı uzantısı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **operasyonel dashboard**: operasyonel dashboard senaryosunda TimescaleDB, PostgreSQL tabanlı time-series veritabanı uzantısı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, TimescaleDB seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+TimescaleDB öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **hypertable**: hypertable kavramı TimescaleDB kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. TimescaleDB öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **chunk**: chunk kavramı TimescaleDB kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. TimescaleDB öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **time partitioning**: time partitioning kavramı TimescaleDB kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. TimescaleDB öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **continuous aggregate**: continuous aggregate kavramı TimescaleDB kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. TimescaleDB öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **retention policy**: retention policy kavramı TimescaleDB kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. TimescaleDB öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **compression**: compression kavramı TimescaleDB kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. TimescaleDB öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **time_bucket**: time_bucket kavramı TimescaleDB kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. TimescaleDB öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+TimescaleDB veri katmanında uzun ömürlü kararlar üretir. Veri modeli, erişim paterni, index stratejisi, yedekleme, migration ve veri büyüme hızı baştan düşünülmelidir.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, TimescaleDB için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```sql
+SELECT create_hypertable('metrics', by_range('time'));
+
+SELECT time_bucket('5 minutes', time) AS bucket, avg(value)
+FROM metrics
+GROUP BY bucket
+ORDER BY bucket DESC;
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Yedekleme** Yedekleme ve restore testini otomatik periyodik sürece bağlayın.
+- **Migrationları** Migrationları geriye dönüş planıyla hazırlayın.
+
+## Sık Yapılan Hatalar
+
+- **zaman kolonunu plansız seçmek**: zaman kolonunu plansız seçmek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **retention politikası koymamak**: retention politikası koymamak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **continuous aggregate’i yanlış granularity ile kurmak**: continuous aggregate’i yanlış granularity ile kurmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **PostgreSQL index mantığını unutmak**: PostgreSQL index mantığını unutmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. TimescaleDB güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+TimescaleDB performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+TimescaleDB kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+TimescaleDB için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [PostgreSQL](/blog/postgresql-iliskisel-modelleme-index-transaction-ve-performans) — PostgreSQL konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Prometheus](/blog/prometheus-metric-toplama-promql-alert-ve-slo-izleme) — Prometheus konusu log, metric, trace, alarm ve incident response pratikleriyle doğrudan ilişkilidir.
+- [MongoDB](/blog/mongodb-document-modelleme-aggregation-ve-index-stratejileri) — MongoDB konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [MySQL](/blog/mysql-iliskisel-tasarim-innodb-index-ve-replikasyon) — MySQL konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [SQLite](/blog/sqlite-gomulu-veritabani-lokal-depolama-ve-edge-kullanimlari) — SQLite konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Cassandra](/blog/cassandra-dagitik-nosql-partition-key-ve-yuksek-yazma-trafigi) — Cassandra konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Prisma](/blog/prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani) — Prisma konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Supabase](/blog/supabase-postgres-auth-realtime-ve-row-level-security) — Supabase konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [ClickHouse](/blog/clickhouse-kolon-bazli-analitik-veritabani-olap-ve-yuksek-hacimli-sorgular) — ClickHouse konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Neo4j](/blog/neo4j-graph-database-cypher-iliski-modelleme-ve-use-case-tasarimi) — Neo4j konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [MinIO](/blog/minio-s3-uyumlu-object-storage-bucket-policy-ve-self-hosted-dosya-yonetimi) — MinIO konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+- [Redis](/blog/redis-cache-queue-rate-limit-ve-realtime-veri-yapilari) — Redis konusu veri modelleme, sorgu performansı, tutarlılık ve saklama stratejisiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin TimescaleDB öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+TimescaleDB, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde TimescaleDB için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, TimescaleDB yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

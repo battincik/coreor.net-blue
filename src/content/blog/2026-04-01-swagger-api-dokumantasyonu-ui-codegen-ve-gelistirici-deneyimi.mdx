@@ -1,0 +1,167 @@
+---
+title: "Swagger Rehberi: API Dokümantasyonu, UI, Codegen ve Geliştirici Deneyimi"
+date: "2026-04-01"
+author: "Coreor Team"
+tags: ["Swagger", "OpenAPI", "API Documentation", "Backend"]
+excerpt: "Swagger ekosistemiyle OpenAPI sözleşmelerini görselleştirmek, API dokümantasyonu sunmak, codegen ve geliştirici deneyimini iyileştirmek için rehber."
+slug: "swagger-api-dokumantasyonu-ui-codegen-ve-gelistirici-deneyimi"
+canonical: "/blog/swagger-api-dokumantasyonu-ui-codegen-ve-gelistirici-deneyimi"
+keywords: ["Swagger", "Swagger rehberi", "Swagger nedir", "Swagger best practices", "Swagger örnekleri", "OpenAPI", "API Documentation", "Backend"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "backend"
+related:
+  - "nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend"
+  - "expressjs-minimal-api-middleware-zinciri-ve-uretim-hazirligi"
+  - "apollo-server-uretime-hazir-graphql-api-tasarimi"
+  - "graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi"
+  - "bun-javascript-runtime-paket-yoneticisi-test-runner-ve-api-gelistirme"
+  - "deno-guvenli-javascript-typescript-runtime-permission-model-ve-deploy"
+  - "zod-typescript-runtime-validation-schema-ve-guvenli-veri-sinirlari"
+  - "openapi-rest-api-sozlesmesi-schema-client-generation-ve-governance"
+  - "rest-api-design-resource-modelleme-http-semantics-ve-versiyonlama"
+  - "websockets-realtime-iletisim-connection-state-ve-olcekleme"
+  - "socket-io-realtime-uygulama-room-namespace-ve-adapter-mimarisi"
+  - "node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri"
+---
+# Swagger Rehberi: API Dokümantasyonu, UI, Codegen ve Geliştirici Deneyimi
+
+Swagger, modern yazılım geliştirme ekosisteminde **OpenAPI dokümantasyon ve araç ekosistemi** için kullanılan önemli başlıklardan biridir. Bu yazı, Swagger konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle API tüketicilerine net ve test edilebilir dokümantasyon sunan backend ekipleri için hazırlandı. Amaç, yazıyı okuyan kişinin Swagger hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** Swagger
+- **Arama niyeti:** Swagger nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde backend kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+Swagger, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **Swagger kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+Swagger özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **internal API portalı**: internal API portalı senaryosunda Swagger, OpenAPI dokümantasyon ve araç ekosistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **partner API dokümantasyonu**: partner API dokümantasyonu senaryosunda Swagger, OpenAPI dokümantasyon ve araç ekosistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **SDK üretimi**: SDK üretimi senaryosunda Swagger, OpenAPI dokümantasyon ve araç ekosistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **QA doğrulaması**: QA doğrulaması senaryosunda Swagger, OpenAPI dokümantasyon ve araç ekosistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **backend/frontend contract paylaşımı**: backend/frontend contract paylaşımı senaryosunda Swagger, OpenAPI dokümantasyon ve araç ekosistemi ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, Swagger seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+Swagger öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **Swagger UI**: Swagger UI kavramı Swagger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Swagger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **Swagger Editor**: Swagger Editor kavramı Swagger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Swagger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **codegen**: codegen kavramı Swagger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Swagger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **try it out**: try it out kavramı Swagger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Swagger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **schema examples**: schema examples kavramı Swagger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Swagger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **API docs hosting**: API docs hosting kavramı Swagger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Swagger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **developer portal**: developer portal kavramı Swagger kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Swagger öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+Swagger backend tarafında konumlandığında transport katmanı ile domain katmanı ayrılmalıdır. HTTP, GraphQL, gRPC veya realtime protokol değişebilir; fakat iş kuralları bu değişimlerden minimum etkilenmelidir.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Swagger için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```ts
+import swaggerUi from "swagger-ui-express";
+import spec from "./openapi.json" assert { type: "json" };
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Timeout,** Timeout, retry, rate limit ve idempotency politikalarını açıkça tanımlayın.
+- **Database** Database ve dış servis çağrılarını trace edilebilir yapın.
+
+## Sık Yapılan Hatalar
+
+- **dokümantasyonu elle güncel tutmaya çalışmak**: dokümantasyonu elle güncel tutmaya çalışmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **örnek payload yazmamak**: örnek payload yazmamak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **auth akışını belirsiz bırakmak**: auth akışını belirsiz bırakmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **hata response’larını belgelememek**: hata response’larını belgelememek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. Swagger güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+Swagger performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Swagger kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+Swagger için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [NestJS](/blog/nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend) — NestJS konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Express.js](/blog/expressjs-minimal-api-middleware-zinciri-ve-uretim-hazirligi) — Express.js konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Apollo Server](/blog/apollo-server-uretime-hazir-graphql-api-tasarimi) — Apollo Server konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [GraphQL](/blog/graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi) — GraphQL konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Bun](/blog/bun-javascript-runtime-paket-yoneticisi-test-runner-ve-api-gelistirme) — Bun konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Deno](/blog/deno-guvenli-javascript-typescript-runtime-permission-model-ve-deploy) — Deno konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Zod](/blog/zod-typescript-runtime-validation-schema-ve-guvenli-veri-sinirlari) — Zod konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [OpenAPI](/blog/openapi-rest-api-sozlesmesi-schema-client-generation-ve-governance) — OpenAPI konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [REST API Design](/blog/rest-api-design-resource-modelleme-http-semantics-ve-versiyonlama) — REST API Design konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [WebSockets](/blog/websockets-realtime-iletisim-connection-state-ve-olcekleme) — WebSockets konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Socket.IO](/blog/socket-io-realtime-uygulama-room-namespace-ve-adapter-mimarisi) — Socket.IO konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Node.js](/blog/node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri) — Node.js konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin Swagger öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+Swagger, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde Swagger için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, Swagger yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

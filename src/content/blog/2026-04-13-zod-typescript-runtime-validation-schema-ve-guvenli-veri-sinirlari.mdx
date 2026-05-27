@@ -1,0 +1,172 @@
+---
+title: "Zod Rehberi: TypeScript Runtime Validation, Schema ve Güvenli Veri Sınırları"
+date: "2026-04-13"
+author: "Coreor Team"
+tags: ["Zod", "TypeScript", "Validation", "API"]
+excerpt: "Zod ile dış dünyadan gelen veriyi doğrulamak, TypeScript tiplerini runtime güvenliğiyle birleştirmek ve API sınırlarını sağlamlaştırmak için rehber."
+slug: "zod-typescript-runtime-validation-schema-ve-guvenli-veri-sinirlari"
+canonical: "/blog/zod-typescript-runtime-validation-schema-ve-guvenli-veri-sinirlari"
+keywords: ["Zod", "Zod rehberi", "Zod nedir", "Zod best practices", "Zod örnekleri", "TypeScript", "Validation", "API"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "backend"
+related:
+  - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
+  - "fastify-yuksek-performansli-node-js-api-ve-plugin-mimarisi"
+  - "trpc-typescript-ile-uctan-uca-tip-guvenli-api-gelistirme"
+  - "apollo-server-uretime-hazir-graphql-api-tasarimi"
+  - "graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi"
+  - "grpc-protobuf-streaming-ve-mikro-servis-iletisimi"
+  - "bun-javascript-runtime-paket-yoneticisi-test-runner-ve-api-gelistirme"
+  - "deno-guvenli-javascript-typescript-runtime-permission-model-ve-deploy"
+  - "openapi-rest-api-sozlesmesi-schema-client-generation-ve-governance"
+  - "swagger-api-dokumantasyonu-ui-codegen-ve-gelistirici-deneyimi"
+  - "rest-api-design-resource-modelleme-http-semantics-ve-versiyonlama"
+  - "websockets-realtime-iletisim-connection-state-ve-olcekleme"
+---
+# Zod Rehberi: TypeScript Runtime Validation, Schema ve Güvenli Veri Sınırları
+
+Zod, modern yazılım geliştirme ekosisteminde **runtime schema validation ve tip çıkarımı** için kullanılan önemli başlıklardan biridir. Bu yazı, Zod konusunu yalnızca tanım seviyesinde değil; mimari karar, üretim ortamı, performans, güvenlik, test ve ekip ölçeği açısından ele alır.
+
+Bu rehber özellikle TypeScript API, form ve domain validation yazan geliştiriciler için hazırlandı. Amaç, yazıyı okuyan kişinin Zod hakkında temel kavramları öğrenmesi, gerçek projede hangi kararları vereceğini anlaması ve hangi hatalardan kaçınacağını bilmesidir.
+
+## SEO Özeti
+
+- **Ana konu:** Zod
+- **Arama niyeti:** Zod nedir, nasıl kullanılır, avantajları nelerdir, production best practices nelerdir?
+- **Okuyucu seviyesi:** Orta seviye ve üzeri geliştiriciler; fakat temel kavramları öğrenmek isteyenler için de açıklayıcıdır.
+- **Seri içindeki rolü:** Bu yazı, Coreor teknik içerik serisinde backend kümesine bağlıdır ve aşağıdaki ilgili yazılarla birlikte okunmalıdır.
+
+## Kısa Tanım
+
+Zod, tek başına bir araç veya kütüphane olarak düşünülmemelidir. Asıl değeri, yazılım sistemindeki sorumluluğu doğru konumlandırıldığında ortaya çıkar. Bir teknolojinin iyi seçilmiş olması, kodun sadece bugün çalışması değil, yarın değiştirilebilir, gözlemlenebilir ve güvenli kalması anlamına gelir.
+
+Güçlü görüşüm şu: **Zod kullanımı, popülerlikten çok problem alanı ve ekip olgunluğu üzerinden değerlendirilmelidir.** Yanlış bağlamda seçilen iyi teknoloji bile teknik borç üretir. Doğru bağlamda seçilen teknoloji ise ekip hızını artırır ve sistem karmaşıklığını kontrol altında tutar.
+
+## Ne Zaman Kullanılır?
+
+Zod özellikle aşağıdaki senaryolarda anlamlıdır:
+
+- **API input validation**: API input validation senaryosunda Zod, runtime schema validation ve tip çıkarımı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **form validation**: form validation senaryosunda Zod, runtime schema validation ve tip çıkarımı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **environment config**: environment config senaryosunda Zod, runtime schema validation ve tip çıkarımı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **webhook payload**: webhook payload senaryosunda Zod, runtime schema validation ve tip çıkarımı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+- **tRPC procedure**: tRPC procedure senaryosunda Zod, runtime schema validation ve tip çıkarımı ihtiyacını pratik bir mimari karara dönüştürür. Burada önemli olan sadece teknolojiyi kullanmak değil; veri akışı, hata davranışı, test stratejisi ve deploy modelini aynı anda planlamaktır.
+
+Bu kullanım alanlarında ortak nokta, Zod seçiminin yalnızca geliştirme anını değil, bakım ve operasyon dönemini de etkilemesidir. Bu yüzden teknoloji seçimini “kurulumu kolay mı?” sorusuyla değil, “sistem büyüdüğünde hâlâ yönetilebilir mi?” sorusuyla değerlendirmek gerekir.
+
+## Temel Kavramlar
+
+Zod öğrenirken aşağıdaki kavramlar mutlaka netleşmelidir:
+
+- **schema**: schema kavramı Zod kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zod öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **parse vs safeParse**: parse vs safeParse kavramı Zod kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zod öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **type inference**: type inference kavramı Zod kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zod öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **refinement**: refinement kavramı Zod kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zod öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **transform**: transform kavramı Zod kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zod öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **error format**: error format kavramı Zod kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zod öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+- **contract boundary**: contract boundary kavramı Zod kullanımında karar kalitesini belirleyen temel yapılardan biridir. Bu kavram doğru anlaşılmadığında kod çalışsa bile ekip ölçeğinde bakım, debug ve güvenilirlik maliyeti artar. Zod öğrenirken bu kavramı yalnızca tanım olarak değil, gerçek proje sınırlarında nasıl uygulanacağıyla birlikte düşünmek gerekir.
+
+Bu kavramlar öğrenilmeden yapılan uygulamalar çoğunlukla yüzeysel kalır. Bir örneği çalıştırmak kolaydır; zor olan, aynı yapıyı ekip büyüdüğünde ve ürün karmaşıklaştığında sürdürülebilir biçimde devam ettirmektir.
+
+## Mimari Bakış Açısı
+
+Zod backend tarafında konumlandığında transport katmanı ile domain katmanı ayrılmalıdır. HTTP, GraphQL, gRPC veya realtime protokol değişebilir; fakat iş kuralları bu değişimlerden minimum etkilenmelidir.
+
+Mimari karar verirken şu sorular erken sorulmalıdır:
+
+1. Bu teknoloji sistemin hangi katmanında sorumluluk alıyor?
+2. Değişim maliyeti hangi ekibe ve hangi kod alanına yansıyacak?
+3. Test, gözlemlenebilirlik ve güvenlik bu kararın neresinde duruyor?
+4. Bu seçim ölçekleme ihtiyacı doğduğunda kolaylık mı sağlayacak, yoksa yeni bir kısıt mı oluşturacak?
+5. Ekip bu teknolojiyi sadece kullanabiliyor mu, yoksa debug edip işletebiliyor mu?
+
+## Örnek Kullanım
+
+Aşağıdaki örnek, Zod için temel yaklaşımı göstermek amacıyla sade tutulmuştur. Production ortamında validation, hata yönetimi, güvenlik, logging ve test katmanları ayrıca ele alınmalıdır.
+
+```ts
+import { z } from "zod";
+
+const CreateUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2),
+  age: z.number().int().positive().optional(),
+});
+
+type CreateUserInput = z.infer<typeof CreateUserSchema>;
+```
+
+Bu örnek bir başlangıç noktasıdır. İyi production kodu; tip güvenliği, gözlemlenebilirlik, geri dönüş stratejisi ve hata davranışıyla birlikte düşünülmelidir.
+
+## Production Best Practices
+
+- **Konfigürasyon** Konfigürasyon ve secret yönetimini koddan ayırın.
+- **Hata** Hata formatı, log standardı ve izleme metriklerini baştan belirleyin.
+- **CI/CD** CI/CD içinde test, lint, type-check ve security scan adımlarını çalıştırın.
+- **Rollback** Rollback stratejisini deploy stratejisinin parçası yapın.
+- **Dokümantasyon** Dokümantasyon ve mimari karar kayıtlarını kısa ama güncel tutun.
+- **Timeout,** Timeout, retry, rate limit ve idempotency politikalarını açıkça tanımlayın.
+- **Database** Database ve dış servis çağrılarını trace edilebilir yapın.
+
+## Sık Yapılan Hatalar
+
+- **TypeScript tipini runtime validation sanmak**: TypeScript tipini runtime validation sanmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **schema tekrarını kontrol etmemek**: schema tekrarını kontrol etmemek ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **hata mesajlarını kullanıcıya göre formatlamamak**: hata mesajlarını kullanıcıya göre formatlamamak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+- **domain validation ile format validationı karıştırmak**: domain validation ile format validationı karıştırmak ilk aşamada küçük bir tercih gibi görünür; fakat proje büyüdükçe değişiklik maliyetini artırır, ekip içi standartları bozar ve üretim hatalarının kök nedenini bulmayı zorlaştırır.
+
+Bu hataların çoğu teknolojinin kendisinden değil, teknolojinin yanlış sınıra yerleştirilmesinden kaynaklanır. Zod güçlü bir araç olabilir; fakat her güçlü araç gibi yanlış kullanıldığında sistemin karmaşıklığını artırır.
+
+## Performans ve Ölçekleme
+
+Zod performansı ölçülürken tek bir metriğe bakmak yeterli değildir. Ortalama değerler çoğu zaman yanıltıcıdır; P95/P99 gecikme, hata oranı, kaynak tüketimi, kuyruk birikimi, cache davranışı ve kullanıcıya yansıyan deneyim birlikte değerlendirilmelidir.
+
+Ölçekleme kararı verilmeden önce darboğaz belirlenmelidir. Sorun CPU mu, ağ mı, veri modeli mi, yanlış cache stratejisi mi, yoksa gereksiz senkron bağımlılıklar mı? Bu soruya cevap vermeden yapılan optimizasyon genellikle maliyeti artırır ama problemi çözmez.
+
+## Güvenlik ve Bakım
+
+Zod kullanılan sistemlerde güvenlik sonradan eklenen bir eklenti gibi düşünülmemelidir. Input validation, permission kontrolü, secret yönetimi, dependency taraması, log hijyeni ve audit ihtiyacı tasarımın parçası olmalıdır.
+
+Bakım tarafında ise şu yaklaşım etkilidir:
+
+- Major versiyon yükseltmeleri küçük parçalara bölünmelidir.
+- Kritik bağımlılıklar için sahiplik belirlenmelidir.
+- Deprecated API kullanımı CI aşamasında yakalanmalıdır.
+- Incident sonrası aksiyonlar backlog’da kaybolmamalı, iyileştirme planına dönüşmelidir.
+- Dokümantasyon, sadece kurulum notu değil karar nedeni de içermelidir.
+
+## Test Stratejisi
+
+Zod için test stratejisi, riskli davranışları güvence altına almalıdır. Her şeyi test etmek mümkün değildir; bu yüzden en kritik kullanıcı akışları, veri dönüşümleri, hata senaryoları ve entegrasyon sınırları önceliklendirilmelidir.
+
+İyi test stratejisi şu dengeyi kurar:
+
+- Unit test ile saf iş mantığı hızlı doğrulanır.
+- Integration test ile dış bağımlılık sınırları kontrol edilir.
+- E2E test ile kritik kullanıcı akışı güvenceye alınır.
+- Contract test ile servisler arası beklenti kırılmaları erken yakalanır.
+
+## İlgili Yazılar
+
+Bu yazı aşağıdaki konularla birlikte düşünülmelidir:
+
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Fastify](/blog/fastify-yuksek-performansli-node-js-api-ve-plugin-mimarisi) — Fastify konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [tRPC](/blog/trpc-typescript-ile-uctan-uca-tip-guvenli-api-gelistirme) — tRPC konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Apollo Server](/blog/apollo-server-uretime-hazir-graphql-api-tasarimi) — Apollo Server konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [GraphQL](/blog/graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi) — GraphQL konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [gRPC](/blog/grpc-protobuf-streaming-ve-mikro-servis-iletisimi) — gRPC konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Bun](/blog/bun-javascript-runtime-paket-yoneticisi-test-runner-ve-api-gelistirme) — Bun konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Deno](/blog/deno-guvenli-javascript-typescript-runtime-permission-model-ve-deploy) — Deno konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [OpenAPI](/blog/openapi-rest-api-sozlesmesi-schema-client-generation-ve-governance) — OpenAPI konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Swagger](/blog/swagger-api-dokumantasyonu-ui-codegen-ve-gelistirici-deneyimi) — Swagger konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [REST API Design](/blog/rest-api-design-resource-modelleme-http-semantics-ve-versiyonlama) — REST API Design konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [WebSockets](/blog/websockets-realtime-iletisim-connection-state-ve-olcekleme) — WebSockets konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+
+İç linkleme yapılırken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı verilmelidir. Örneğin Zod öğrenen biri, sonraki adımda bu teknolojinin veri, deploy, test veya güvenlik tarafındaki etkisini de anlamalıdır.
+
+## Sonuç
+
+Zod, doğru bağlamda kullanıldığında güçlü bir kaldıraç sağlar. Fakat iyi teknoloji seçimi, “hangi araç daha popüler?” sorusuyla değil, “bu araç ürünün bugünkü ihtiyacını çözerken yarınki karmaşıklığı yönetilebilir kılıyor mu?” sorusuyla yapılmalıdır.
+
+Bu rehberde Zod için temel kavramları, kullanım alanlarını, mimari bakışı, örnek kullanımı, production pratiklerini, sık hataları, performans, güvenlik ve test stratejilerini ele aldık. Serinin diğer yazılarıyla birlikte okunduğunda, Zod yalnızca tekil bir teknoloji olarak değil, modern yazılım mimarisinin ilişkili bir parçası olarak daha net anlaşılır.

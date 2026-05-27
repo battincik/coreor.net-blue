@@ -7,12 +7,21 @@ excerpt: "NestJS ile modüler, test edilebilir ve kurumsal backend uygulamaları
 slug: "nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend"
 canonical: "/blog/nestjs-moduler-mimari-dependency-injection-ve-kurumsal-backend"
 keywords: ["NestJS", "NestJS rehberi", "NestJS nedir", "NestJS örnekleri", "NestJS best practices", "Node.js", "TypeScript"]
+series: "Coreor Modern Yazılım Teknolojileri"
+cluster: "backend"
 related:
-  - "node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri"
   - "typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod"
-  - "prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani"
+  - "node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri"
+  - "openapi-rest-api-sozlesmesi-schema-client-generation-ve-governance"
+  - "swagger-api-dokumantasyonu-ui-codegen-ve-gelistirici-deneyimi"
+  - "passport-js-node-js-authentication-strategy-session-ve-jwt-entegrasyonu"
   - "rabbitmq-message-queue-exchange-retry-ve-event-driven-mimari"
-  - "graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi"
+  - "apache-kafka-event-streaming-topic-partition-ve-consumer-group"
+  - "clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu"
+  - "domain-driven-design-bounded-context-entity-value-object-ve-ubiquitous-language"
+  - "fastify-yuksek-performansli-node-js-api-ve-plugin-mimarisi"
+  - "expressjs-minimal-api-middleware-zinciri-ve-uretim-hazirligi"
+  - "trpc-typescript-ile-uctan-uca-tip-guvenli-api-gelistirme"
 ---
 
 # NestJS Rehberi: Modüler Mimari, Dependency Injection ve Kurumsal Backend
@@ -170,13 +179,20 @@ Bakım tarafında ise şu yaklaşım güçlüdür:
 
 ## İlgili Yazılar
 
-- [Node.js](/blog/node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri)
-- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod)
-- [Prisma](/blog/prisma-type-safe-orm-migration-ve-veritabani-erisim-katmani)
-- [RabbitMQ](/blog/rabbitmq-message-queue-exchange-retry-ve-event-driven-mimari)
-- [GraphQL](/blog/graphql-schema-tasarimi-resolver-mimarisi-ve-api-evrimi)
+- [TypeScript](/blog/typescript-tip-guvenligi-generic-yapilar-ve-olceklenebilir-kod) — TypeScript konusu kullanıcı arayüzü, developer experience, bundle stratejisi ve ürün deneyimiyle doğrudan ilişkilidir.
+- [Node.js](/blog/node-js-event-loop-api-gelistirme-olcekleme-ve-uretim-pratikleri) — Node.js konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [OpenAPI](/blog/openapi-rest-api-sozlesmesi-schema-client-generation-ve-governance) — OpenAPI konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Swagger](/blog/swagger-api-dokumantasyonu-ui-codegen-ve-gelistirici-deneyimi) — Swagger konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Passport.js](/blog/passport-js-node-js-authentication-strategy-session-ve-jwt-entegrasyonu) — Passport.js konusu kimlik doğrulama, yetkilendirme, token güvenliği ve kurumsal erişim modeliyle doğrudan ilişkilidir.
+- [RabbitMQ](/blog/rabbitmq-message-queue-exchange-retry-ve-event-driven-mimari) — RabbitMQ konusu asenkron iletişim, event-driven mimari, retry ve sistemler arası gevşek bağlılıkla doğrudan ilişkilidir.
+- [Apache Kafka](/blog/apache-kafka-event-streaming-topic-partition-ve-consumer-group) — Apache Kafka konusu asenkron iletişim, event-driven mimari, retry ve sistemler arası gevşek bağlılıkla doğrudan ilişkilidir.
+- [Clean Architecture](/blog/clean-architecture-use-case-interface-adapter-ve-bagimlilik-yonu) — Clean Architecture konusu servis sınırları, domain modelleme, bağımlılık yönü ve uzun vadeli bakım maliyetiyle doğrudan ilişkilidir.
+- [Domain-Driven Design](/blog/domain-driven-design-bounded-context-entity-value-object-ve-ubiquitous-language) — Domain-Driven Design konusu servis sınırları, domain modelleme, bağımlılık yönü ve uzun vadeli bakım maliyetiyle doğrudan ilişkilidir.
+- [Fastify](/blog/fastify-yuksek-performansli-node-js-api-ve-plugin-mimarisi) — Fastify konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [Express.js](/blog/expressjs-minimal-api-middleware-zinciri-ve-uretim-hazirligi) — Express.js konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
+- [tRPC](/blog/trpc-typescript-ile-uctan-uca-tip-guvenli-api-gelistirme) — tRPC konusu API, iş kuralları, servis sınırları, veri erişimi ve operasyon güvenilirliğiyle doğrudan ilişkilidir.
 
-Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Örneğin NestJS öğrenen bir okuyucu, sonraki adımda hangi teknolojiyi gerçekten merak edecekse link oraya gitmelidir.
+Bu yazılar arasında iç linkleme yaparken yalnızca anahtar kelimeye değil, okuyucunun öğrenme akışına göre bağlantı vermek daha değerlidir. Bu seri içinde her yazı; frontend, backend, veri, güvenlik, DevOps, cloud, observability, test ve mimari başlıklarıyla çapraz ilişkilendirilmiştir.
 
 ## Sonuç
 
