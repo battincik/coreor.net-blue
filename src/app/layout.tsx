@@ -3,11 +3,12 @@ import Script from "next/script"
 import { Suspense } from "react"
 import "@/index.css"
 import { Providers } from "@/components/providers"
-import { Analytics } from "@/components/analytics"
+import { AnalyticsVanilla } from "@/components/analytics"
 import { buildSiteMetadata, buildWebsiteJsonLd, organizationJsonLd } from "@/lib/seo"
 import { SiteShell } from "@/components/site-shell"
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = buildSiteMetadata({
   title: "Coreor.net",
@@ -54,10 +55,11 @@ gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname });
         </Script>
         <Providers>
           <Suspense fallback={null}>
-            <Analytics />
+            <AnalyticsVanilla />
           </Suspense>
           <SiteShell>{children}</SiteShell>
           <SpeedInsights />
+          <Analytics />
         </Providers>
       </body>
     </html>

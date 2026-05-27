@@ -12,7 +12,7 @@ declare global {
 
 const googleAnalyticsId = process.env.NEXT_PUBLIC_GA_ID
 
-export function Analytics() {
+export function AnalyticsVanilla() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const firstRun = useRef(true)
