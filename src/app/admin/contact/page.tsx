@@ -8,11 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select"
 import { SERVICES } from "@/lib/services"
 import { cn } from "@/lib/utils"
-import { CalendarDays, ChevronLeft, ChevronRight, Eye, LockKeyhole, Mail, MessageSquareText, Search, ShieldCheck, UserRound, X } from "lucide-react"
+import { CalendarDays, ChevronLeft, ChevronRight, Eye, Mail, Search, UserRound, X } from "lucide-react"
 
-const ADMIN_PASSWORD = "123qwer123"
 const API_BASE = process.env.NEXT_PUBLIC_CONTACT_API_BASE_URL ?? "https://api.coreor.net/v1/contact/messages/search"
-const SESSION_KEY = "coreor-admin-contact-auth"
 
 type ContactMessage = {
   id: string
@@ -123,9 +121,6 @@ function DetailRow({ label, value }: { label: string; value: unknown }) {
 }
 
 export default function AdminContactPage() {
-  const [password, setPassword] = useState("")
-  const [isUnlocked, setIsUnlocked] = useState(false)
-  const [authError, setAuthError] = useState("")
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS)
   const [appliedFilters, setAppliedFilters] = useState<Filters>(INITIAL_FILTERS)
   const [messages, setMessages] = useState<ContactMessage[]>([])
@@ -137,13 +132,6 @@ export default function AdminContactPage() {
   const [detailId, setDetailId] = useState<string | null>(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const lastRequestKeyRef = React.useRef("")
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    if (sessionStorage.getItem(SESSION_KEY) === "ok") {
-      setIsUnlocked(true)
-    }
-  }, [])
 
   const searchUrl = useMemo(() => {
     const url = new URL(API_BASE)
@@ -162,8 +150,6 @@ export default function AdminContactPage() {
   }, [appliedFilters, page, limit])
 
   useEffect(() => {
-    if (!isUnlocked) return
-
     let cancelled = false
     const requestKey = searchUrl
 
@@ -210,7 +196,7 @@ export default function AdminContactPage() {
       cancelled = true
       controller.abort()
     }
-  }, [isUnlocked, searchUrl, page, limit])
+  }, [searchUrl, page, limit])
 
   const stats = [
     { label: "Total", value: meta.total },
@@ -218,17 +204,6 @@ export default function AdminContactPage() {
     { label: "Limit", value: limit },
     { label: "Visible", value: messages.length },
   ]
-
-  const handleLogin = () => {
-    if (password.trim() === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "ok")
-      setIsUnlocked(true)
-      setAuthError("")
-      return
-    }
-
-    setAuthError("Incorrect password.")
-  }
 
   const resetFilters = () => {
     setFilters(INITIAL_FILTERS)
@@ -239,42 +214,6 @@ export default function AdminContactPage() {
   const applyFilters = () => {
     setAppliedFilters(filters)
     setPage(1)
-  }
-
-  if (!isUnlocked) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 py-10">
-        <div className="absolute inset-0 grid-bg opacity-40" />
-        <Card className="relative w-full max-w-md border-border/60 bg-card/90 backdrop-blur-xl shadow-2xl">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <LockKeyhole className="h-5 w-5" />
-            </div>
-            <CardTitle className="text-2xl">Admin Contact</CardTitle>
-            <CardDescription>Access this page via URL and continue with your password.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Password</label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") handleLogin()
-                }}
-                placeholder="Secret Code"
-                className="bg-input/30"
-              />
-              {authError ? <p className="mt-2 text-sm text-destructive">{authError}</p> : null}
-            </div>
-            <Button onClick={handleLogin} className="w-full btn-glow bg-primary text-primary-foreground font-semibold">
-              Sign In
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   return (

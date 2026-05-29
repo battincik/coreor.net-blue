@@ -1,11 +1,44 @@
+import type { Metadata } from "next"
+import Script from "next/script"
 import Link from "next/link"
 import { SERVICES } from "@/lib/services"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Sparkles } from "lucide-react"
+import { absoluteUrl, buildBreadcrumbJsonLd, buildCollectionJsonLd, buildSiteMetadata } from "@/lib/seo"
+
+export const metadata: Metadata = buildSiteMetadata({
+  title: "Services",
+  description: "Explore Coreor services for web, mobile, cloud, AI, database, and hosting projects.",
+  path: "/services",
+  pageType: "servicesIndex",
+  keywords: ["web development", "mobile app development", "cloud solutions", "ai integration", "database management", "hosting"],
+})
 
 export default function ServicesIndex() {
+  const serviceCollectionJsonLd = buildCollectionJsonLd({
+    name: "Coreor Services",
+    description: "Detailed engineering services by Coreor.",
+    url: absoluteUrl("/services"),
+    type: "CollectionPage",
+    items: SERVICES.map((service) => ({
+      name: service.title,
+      url: absoluteUrl(`/services/${service.slug}`),
+    })),
+  })
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Services", path: "/services" },
+  ])
+
   return (
-    <main className="relative overflow-hidden pt-28 pb-24">
+    <>
+      <Script id="services-collection-jsonld" type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(serviceCollectionJsonLd)}
+      </Script>
+      <Script id="services-breadcrumb-jsonld" type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(breadcrumbJsonLd)}
+      </Script>
+      <main className="relative overflow-hidden pt-28 pb-24">
       <div className="absolute inset-0 grid-bg opacity-40" />
       <div className="absolute inset-0 hero-glow" />
 
@@ -52,6 +85,7 @@ export default function ServicesIndex() {
           ))}
         </div>
       </div>
-    </main>
+      </main>
+    </>
   )
 }

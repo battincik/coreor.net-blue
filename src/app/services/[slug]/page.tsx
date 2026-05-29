@@ -1,11 +1,35 @@
+import type { Metadata } from "next"
 import Script from "next/script"
 import { getService } from "@/lib/services"
 import Link from "next/link"
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { absoluteUrl, buildServiceJsonLd, siteConfig } from "@/lib/seo"
+import { absoluteUrl, buildBreadcrumbJsonLd, buildFaqJsonLd, buildServiceJsonLd, buildSiteMetadata, siteConfig } from "@/lib/seo"
 
 type Props = { params: Promise<{ slug: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolved = (await params) as { slug: string }
+  const service = getService(resolved.slug)
+
+  if (!service) {
+    return buildSiteMetadata({
+      title: "Service not found",
+      description: "The requested service could not be found.",
+      path: "/services",
+      pageType: "servicesIndex",
+      noIndex: true,
+    })
+  }
+
+  return buildSiteMetadata({
+    title: service.seoTitle,
+    description: service.seoDescription,
+    path: `/services/${service.slug}`,
+    pageType: "servicePage",
+    keywords: service.keywords,
+  })
+}
 
 export default async function ServicePage({ params }: Props) {
   const resolved = (await params) as { slug: string }
@@ -29,11 +53,25 @@ export default async function ServicePage({ params }: Props) {
     category: "Digital Service",
     image: siteConfig.ogImage,
   })
+  const faqJsonLd = buildFaqJsonLd(
+    service.faqs.map((item) => ({ question: item.question, answer: item.answer })),
+  )
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Services", path: "/services" },
+    { name: service.title, path: `/services/${service.slug}` },
+  ])
 
   return (
     <>
       <Script id={`service-jsonld-${service.slug}`} type="application/ld+json" strategy="beforeInteractive">
         {JSON.stringify(serviceJsonLd)}
+      </Script>
+      <Script id={`service-faq-jsonld-${service.slug}`} type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(faqJsonLd)}
+      </Script>
+      <Script id={`service-breadcrumb-jsonld-${service.slug}`} type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(breadcrumbJsonLd)}
       </Script>
       <main className="relative overflow-hidden pt-28 pb-24">
         <div className="absolute inset-0 grid-bg opacity-40" />

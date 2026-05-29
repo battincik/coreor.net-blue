@@ -299,6 +299,65 @@ export function buildServiceJsonLd(options: {
   }
 }
 
+export function buildBreadcrumbJsonLd(items: Array<{ name: string; path: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  }
+}
+
+export function buildFaqJsonLd(items: Array<{ question: string; answer: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  }
+}
+
+export function buildWebPageJsonLd(options: {
+  name: string
+  description: string
+  path: string
+  breadcrumb?: Array<{ name: string; path: string }>
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: options.name,
+    description: options.description,
+    url: absoluteUrl(options.path),
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    breadcrumb: options.breadcrumb
+      ? {
+          "@type": "BreadcrumbList",
+          itemListElement: options.breadcrumb.map((item, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: item.name,
+            item: absoluteUrl(item.path),
+          })),
+        }
+      : undefined,
+  }
+}
+
 function normalizePath(path: string) {
   if (!path) return "/"
   const cleanedPath = path.split(/[?#]/)[0].replace(/\/+/g, "/")

@@ -1,14 +1,46 @@
+import type { Metadata } from "next"
+import Script from "next/script"
 import Link from "next/link"
 import { POSTS } from "@/lib/blog"
 import { Badge } from "@/components/ui/badge"
+import { absoluteUrl, buildBreadcrumbJsonLd, buildCollectionJsonLd, buildSiteMetadata } from "@/lib/seo"
+
+export const metadata: Metadata = buildSiteMetadata({
+  title: "Blog",
+  description: "Engineering insights on architecture, cloud, security, performance, and product delivery.",
+  path: "/blog",
+  pageType: "blogIndex",
+  keywords: ["engineering blog", "next.js", "cloud", "security", "software architecture", "product engineering"],
+})
 
 export default function BlogIndex() {
   const featured = POSTS[0]
   const latest = POSTS.slice(1)
   const uniqueTags = Array.from(new Set(POSTS.flatMap((post) => post.tags))).slice(0, 8)
+  const collectionJsonLd = buildCollectionJsonLd({
+    name: "Coreor Blog",
+    description: "Engineering insights from the Coreor team.",
+    url: absoluteUrl("/blog"),
+    type: "Blog",
+    items: POSTS.map((post) => ({
+      name: post.title,
+      url: absoluteUrl(`/blog/${post.slug}`),
+    })),
+  })
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
+  ])
 
   return (
-    <main className="relative pt-28 pb-24 overflow-hidden">
+    <>
+      <Script id="blog-collection-jsonld" type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(collectionJsonLd)}
+      </Script>
+      <Script id="blog-breadcrumb-jsonld" type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(breadcrumbJsonLd)}
+      </Script>
+      <main className="relative pt-28 pb-24 overflow-hidden">
       <div className="absolute inset-0 grid-bg" />
       <div className="absolute inset-0 hero-glow" />
       <div
@@ -99,6 +131,7 @@ export default function BlogIndex() {
           ))}
         </section>
       </div>
-    </main>
+      </main>
+    </>
   )
 }

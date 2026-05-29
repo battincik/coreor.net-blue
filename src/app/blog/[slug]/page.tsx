@@ -1,13 +1,45 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
 import rehypeSlug from "rehype-slug"
 import { POSTS, getPostBySlug } from "@/lib/blog"
-import { absoluteUrl, buildArticleJsonLd, siteConfig } from "@/lib/seo"
+import { absoluteUrl, buildArticleJsonLd, buildBreadcrumbJsonLd, buildSiteMetadata, siteConfig } from "@/lib/seo"
 
 type Props = {
   params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolved = (await params) as { slug: string }
+  const post = getPostBySlug(resolved.slug)
+
+  if (!post) {
+    return buildSiteMetadata({
+      title: "Post not found",
+      description: "The requested article could not be found.",
+      path: "/blog",
+      pageType: "blogIndex",
+      noIndex: true,
+    })
+  }
+
+  return buildSiteMetadata({
+    title: post.title,
+    description: post.excerpt,
+    path: `/blog/${post.slug}`,
+    pageType: "blogPost",
+    type: "article",
+    keywords: post.tags,
+    article: {
+      publishedTime: post.date,
+      modifiedTime: post.date,
+      authors: [post.author],
+      tags: post.tags,
+      section: "Engineering",
+    },
+  })
 }
 
 function slugifyHeading(value: string) {
@@ -72,6 +104,11 @@ export default async function BlogPost({ params }: Props) {
     author: post.author,
     tags: post.tags,
   })
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
+    { name: post.title, path: `/blog/${post.slug}` },
+  ])
 
   return (
     <>
@@ -79,6 +116,11 @@ export default async function BlogPost({ params }: Props) {
         id={`blog-post-jsonld-${post.slug}`}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        id={`blog-post-breadcrumb-jsonld-${post.slug}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <main className="relative pt-28 pb-24 overflow-hidden">
         <div className="absolute inset-0 grid-bg" />
