@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     process.env.COREOR_OAUTH_TOKEN_URL,
     `${apiBase}/v2/oauth2/token`,
     `${apiBase}/oauth2/token`,
-    "https://account.coreor.net/oauth2/token",
+    "https://api.coreor.net/oauth2/token",
   ].filter((value, index, arr): value is string => Boolean(value) && arr.indexOf(value) === index)
 
   let tokenData: any = null
