@@ -131,7 +131,45 @@ export default function AdminContactPage() {
   const [error, setError] = useState("")
   const [detailId, setDetailId] = useState<string | null>(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [sessionLoading, setSessionLoading] = useState(true)
+  const [sessionSignedIn, setSessionSignedIn] = useState(false)
+  const [sessionHasAdminAccess, setSessionHasAdminAccess] = useState(false)
+  const [sessionIdentity, setSessionIdentity] = useState<string | null>(null)
   const lastRequestKeyRef = React.useRef("")
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadSession = async () => {
+      try {
+        const response = await fetch("/api/admin/session", {
+          headers: {
+            Accept: "application/json",
+          },
+        })
+
+        const json = await response.json()
+        if (cancelled) return
+
+        setSessionSignedIn(Boolean(json?.signedIn))
+        setSessionHasAdminAccess(Boolean(json?.hasAdminAccess))
+        setSessionIdentity(typeof json?.identity === "string" && json.identity.trim() ? json.identity : null)
+      } catch {
+        if (cancelled) return
+        setSessionSignedIn(false)
+        setSessionHasAdminAccess(false)
+        setSessionIdentity(null)
+      } finally {
+        if (!cancelled) setSessionLoading(false)
+      }
+    }
+
+    void loadSession()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const searchUrl = useMemo(() => {
     const url = new URL(API_BASE)
@@ -218,7 +256,7 @@ export default function AdminContactPage() {
 
   return (
     <div className="relative overflow-hidden">
-      <section className="relative pt-28 pb-14">
+      <section className="relative pt-10 pb-14">
         <div className="absolute inset-0 grid-bg opacity-50" />
         <div className="absolute inset-0 hero-glow" />
         <div className="relative mx-auto max-w-7xl px-6">

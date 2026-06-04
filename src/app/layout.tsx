@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import Script from "next/script"
 import { Suspense } from "react"
 import "@/index.css"
 import { Providers } from "@/components/providers"
@@ -35,24 +34,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {googleAnalyticsId ? (
           <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
-              strategy="lazyOnload"
-            />
-            <Script id="gtag-init" strategy="lazyOnload">
-              {`window.dataLayer = window.dataLayer || [];
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} />
+            <script dangerouslySetInnerHTML={{
+                __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname });`}
-            </Script>
+gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname });`,
+              }}
+            />
           </>
         ) : null}
-        <Script id="organization-jsonld" type="application/ld+json" strategy="beforeInteractive">
-          {JSON.stringify(organizationJsonLd)}
-        </Script>
-        <Script id="website-jsonld" type="application/ld+json" strategy="beforeInteractive">
-          {JSON.stringify(buildWebsiteJsonLd())}
-        </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebsiteJsonLd()) }}
+        />
         <Providers>
           <Suspense fallback={null}>
             <AnalyticsVanilla />
