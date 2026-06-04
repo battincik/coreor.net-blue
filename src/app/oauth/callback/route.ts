@@ -35,7 +35,6 @@ export async function GET(req: NextRequest) {
         code,
         client_id: clientId,
         client_secret: clientSecret,
-        redirect_uri: redirectUri,
       }),
       cache: "no-store",
     })
