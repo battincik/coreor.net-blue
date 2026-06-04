@@ -11,9 +11,8 @@ export async function GET(req: NextRequest) {
   const apiBase = process.env.COREOR_API_BASE
   const clientId = process.env.COREOR_OAUTH_CLIENT_ID
   const clientSecret = process.env.COREOR_OAUTH_CLIENT_SECRET
-  const redirectUri = process.env.COREOR_OAUTH_REDIRECT_URI
 
-  if (!apiBase || !clientId || !clientSecret || !redirectUri) {
+  if (!apiBase || !clientId || !clientSecret) {
     return NextResponse.json({ error: "Missing OAuth environment variables" }, { status: 500 })
   }
 
