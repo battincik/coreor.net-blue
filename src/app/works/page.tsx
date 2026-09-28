@@ -43,6 +43,7 @@ type Project = {
     category: ProjectCategory;
     status: ProjectStatus;
     tags: string[];
+    technologies: string[];
     desc: string;
     impact: string[];
     year: string;
@@ -84,6 +85,7 @@ const projects: Project[] = [
         category: "Product",
         status: "Active Development",
         tags: ["React", "TypeScript", "Next.js", "Data Grid", "NPM"],
+        technologies: ["React", "TypeScript", "Next.js", "JavaScript", "NPM Package", "Data Grid", "Virtualization", "CSV Export", "Server Queries", "Tailwind CSS"],
         desc: "A typed React data grid and interactive showcase for building dense, configurable data experiences.",
         impact: [
             "19 configurable cell types",
@@ -112,6 +114,7 @@ const projects: Project[] = [
         category: "Desktop",
         status: "Pre-release",
         tags: ["Tauri 2", "Rust", "React", "Next.js", "SQL"],
+        technologies: ["Tauri 2", "Rust", "React", "Next.js", "TypeScript", "SQL", "MySQL", "MariaDB", "PostgreSQL", "CockroachDB", "TiDB", "Microsoft SQL Server", "Tauri IPC"],
         desc: "A local-first, cross-platform database client for SQL, schema exploration and database administration.",
         impact: [
             "MySQL, MariaDB, PostgreSQL and SQL Server workflows",
@@ -122,7 +125,6 @@ const projects: Project[] = [
         year: "2026",
         color: "from-sky-500/30 via-indigo-500/15 to-violet-500/10",
         href: "https://github.com/battincik/coreor-database",
-        private: true,
         icon: Database,
         overview:
             "Coreor Database is a local-first desktop workspace that brings SQL editing, object exploration and administration tools together in one focused application.",
@@ -140,6 +142,7 @@ const projects: Project[] = [
         category: "Web",
         status: "Private",
         tags: ["Next.js", "TypeScript", "Commerce", "Product UI"],
+        technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Commerce UI", "Product Catalog", "Responsive Design", "Vercel"],
         desc: "A commerce-focused product experience exploring a polished foundation for catalog, shopping and operational workflows.",
         impact: [
             "Commerce product direction and interface system",
@@ -169,6 +172,7 @@ const projects: Project[] = [
         category: "Product",
         status: "Private",
         tags: ["TypeScript", "React", "Next.js", "Product Design"],
+        technologies: ["TypeScript", "React", "Next.js", "API Client", "Responsive UI", "Product Design", "Web Application"],
         desc: "A focused client application concept built around a clean interaction model and an adaptable product foundation.",
         impact: [
             "Focused client-side product experience",
@@ -198,6 +202,7 @@ const projects: Project[] = [
         category: "Backend",
         status: "Active Development",
         tags: ["Bun", "Elysia", "TypeScript", "MySQL2", "Backend"],
+        technologies: ["Bun", "Elysia", "TypeScript", "MySQL2", "OOP", "REST API", "OpenAPI", "Scalar", "Auth Middleware", "Rate Limiting", "Request Logger", "Modular Architecture"],
         desc: "A modular OOP backend foundation for building structured APIs with Bun, Elysia and TypeScript.",
         impact: [
             "Route → Controller → Service architecture",
@@ -226,6 +231,7 @@ const projects: Project[] = [
         category: "Product",
         status: "Product Direction",
         tags: ["TypeScript", "CRM", "Web App", "Product Strategy"],
+        technologies: ["TypeScript", "React", "Next.js", "CRM", "Web App", "Customer Data", "Sales Pipeline", "Product Strategy", "Workspace UX"],
         desc: "A CRM product direction for bringing customer relationships, sales workflows and team context into one focused workspace.",
         impact: [
             "CRM-focused product architecture",
@@ -633,7 +639,7 @@ export default function WorksPage() {
                                         Technology
                                     </p>
                                     <div className="flex flex-wrap gap-2">
-                                        {selectedProject.tags.map((tag) => {
+                                        {selectedProject.technologies.map((tag) => {
                                             const TechIcon = techIcons[tag] || Code2;
                                             return (
                                                 <span
