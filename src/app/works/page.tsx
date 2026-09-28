@@ -6,91 +6,87 @@ import { Button } from "@/components/ui/button";
 import { useNav } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
-type Category = "All" | "Web" | "Mobile" | "Cloud" | "AI";
+type Category = "All" | "Web" | "Desktop" | "Product";
 
 const projects = [
-    // {
-    //   title: "NexusBank Platform",
-    //   category: "Web" as Category,
-    //   tags: ["React", "Node.js", "PostgreSQL", "AWS"],
-    //   desc: "A fully-featured digital banking platform serving 200,000+ customers. Includes real-time transaction processing, multi-currency support, and a regulatory compliance dashboard.",
-    //   impact: ["$2M+ daily transaction volume", "200K active users", "99.99% uptime"],
-    //   year: "2023",
-    //   color: "from-cyan-500/20 to-sky-500/10",
-    // },
-    // {
-    //   title: "MediLink Health App",
-    //   category: "Mobile" as Category,
-    //   tags: ["React Native", "Go", "FHIR", "AWS"],
-    //   desc: "A HIPAA-compliant telemedicine platform connecting patients with specialists. Features real-time video consultations, EHR integration, and AI-assisted symptom checking.",
-    //   impact: ["15,000 monthly consultations", "50+ hospitals integrated", "4.9 App Store rating"],
-    //   year: "2023",
-    //   color: "from-teal-500/20 to-emerald-500/10",
-    // },
-    // {
-    //   title: "CloudVault Infrastructure",
-    //   category: "Cloud" as Category,
-    //   tags: ["Kubernetes", "Terraform", "AWS", "Prometheus"],
-    //   desc: "Designed and migrated a legacy monolith to a 40-microservice Kubernetes cluster for a logistics company. Reduced infrastructure costs by 60% while tripling throughput.",
-    //   impact: ["60% cost reduction", "3x throughput increase", "Zero-downtime migration"],
-    //   year: "2022",
-    //   color: "from-sky-500/20 to-cyan-500/10",
-    // },
-    // {
-    //   title: "DataMind Analytics",
-    //   category: "AI" as Category,
-    //   tags: ["Python", "TensorFlow", "Kafka", "React"],
-    //   desc: "An AI-powered business intelligence platform that ingests streaming data and generates natural-language insights for non-technical executives. Processes 10M events per day.",
-    //   impact: ["10M daily events", "98% prediction accuracy", "3-minute setup time"],
-    //   year: "2024",
-    //   color: "from-cyan-500/20 to-teal-500/10",
-    // },
     {
-        title: "Coreor E-Commerce Platform",
-        category: "Web" as Category,
-        tags: ["Next.js", "Stripe", "Redis", "Elasticsearch", "Microservices"],
-        desc: "A scalable and fully customizable e-commerce platform designed for modern retail operations. Built with a composable architecture, the system supports modular feature development, enabling businesses to tailor every aspect of the shopping experience. It includes advanced product management, high-performance search powered by Elasticsearch, real-time caching with Redis, and seamless payment integrations. The platform is engineered to handle high traffic scenarios such as flash sales while maintaining low latency and reliability.",
+        title: "Coreor DataTable",
+        category: "Product" as Category,
+        tags: ["React", "TypeScript", "Next.js", "Data Grid", "NPM"],
+        desc: "A typed React data grid and interactive showcase for building dense, configurable data experiences with reusable cell types, editors, filters, pagination and exports.",
         impact: [
-            "Modular and extensible architecture enabling rapid feature development",
-            "Sub-100ms response times with Redis-based caching",
-            "Scalable infrastructure designed for high concurrency workloads",
-            "Flexible product and campaign management system",
-            "Ongoing development with continuous performance and feature improvements",
+            "19 configurable cell types",
+            "Virtual rows and server-query patterns",
+            "Selection across pages with CSV export",
+            "Table Maker for reusable grid configuration",
         ],
-        year: "2023",
-        color: "from-sky-500/20 to-blue-500/10",
+        year: "2026",
+        color: "from-cyan-500/20 to-blue-500/10",
+        href: "https://github.com/battincik/coreor-datatable",
     },
     {
-        title: "Fleet Management Platform",
-        category: "AI" as Category,
-        tags: ["Python", "React Native", "GraphQL", "ML", "Microservices"],
-        desc: "An end-to-end fleet management and analytics platform built for vehicle rental companies. The system provides real-time vehicle tracking, fuel consumption monitoring, predictive maintenance, customer management, and integrated payment workflows. Advanced machine learning models analyze vehicle usage patterns and predict potential failures, while analytics dashboards deliver actionable insights to optimize operations and reduce costs.",
+        title: "Coreor Database",
+        category: "Desktop" as Category,
+        tags: ["Tauri 2", "Rust", "React", "Next.js", "SQL"],
+        desc: "A local-first, cross-platform database client designed for developers who need a focused workspace for SQL, schema exploration and database administration.",
         impact: [
-            "2,000+ vehicles tracked in real-time",
-            "45% reduction in downtime",
-            "30% fuel cost optimization",
-            "End-to-end rental, customer, and payment management",
+            "MySQL, MariaDB, PostgreSQL and SQL Server workflows",
+            "Object Explorer and SQL workspace",
+            "Table editing, filtering and pagination",
+            "Schema graph, import/export and performance tools",
         ],
-        year: "2024",
-        color: "from-cyan-500/20 to-sky-500/10",
+        year: "2026",
+        color: "from-sky-500/20 to-indigo-500/10",
+        href: "https://github.com/battincik/coreor-database",
     },
     {
-        title: "Real Estate CRM Platform",
+        title: "Coreor Commerce",
         category: "Web" as Category,
-        tags: ["React", "Node.js", "MongoDB", "Mapbox", "Microservices"],
-        desc: "A comprehensive CRM platform built for real estate agencies to manage property listings, land portfolios, and customer relationships in a unified system. The platform features advanced property search with interactive maps, lead tracking, client segmentation, and AI-assisted property valuation. Designed with a scalable microservices architecture, it supports multi-region operations and high-performance data processing for real-time insights.",
+        tags: ["Next.js", "TypeScript", "Commerce", "Product UI"],
+        desc: "A commerce-focused product experience exploring a polished foundation for catalog, shopping and operational workflows.",
         impact: [
-            "12,000+ active property listings",
-            "Used across 3 countries",
-            "AI-powered property valuation in under 2 seconds",
-            "Improved lead conversion and client tracking efficiency",
+            "Commerce product direction and interface system",
+            "Responsive web application foundation",
+            "Designed for future modular expansion",
+            "Clear path from product concept to implementation",
         ],
-        year: "2022",
-        color: "from-teal-500/20 to-sky-500/10",
+        year: "2026",
+        color: "from-violet-500/20 to-fuchsia-500/10",
+        href: "https://github.com/battincik/coreor-commerce",
+    },
+    {
+        title: "Inkflow Client",
+        category: "Product" as Category,
+        tags: ["TypeScript", "React", "Next.js", "Product Design"],
+        desc: "A focused client application concept built around a clean, modern interaction model and a foundation that can evolve with the product.",
+        impact: [
+            "Focused client-side product experience",
+            "Reusable TypeScript application foundation",
+            "Designed for iterative feature development",
+            "Clean interface direction for future workflows",
+        ],
+        year: "2026",
+        color: "from-emerald-500/20 to-teal-500/10",
+        href: "https://github.com/battincik/inkflow-client",
+    },
+    {
+        title: "Nexa CRM",
+        category: "Product" as Category,
+        tags: ["TypeScript", "CRM", "Web App", "Product Strategy"],
+        desc: "A CRM product direction for bringing customer relationships, sales workflows and team context into one focused workspace.",
+        impact: [
+            "CRM-focused product architecture",
+            "Customer and pipeline workflow foundation",
+            "Prepared for modular team experiences",
+            "Clear product direction for the next build phase",
+        ],
+        year: "2026",
+        color: "from-amber-500/20 to-orange-500/10",
+        href: "https://github.com/battincik/nexa-crm",
     },
 ];
 
-const categories: Category[] = ["All", "Web", "Mobile", "Cloud", "AI"];
+const categories: Category[] = ["All", "Web", "Desktop", "Product"];
 
 function RevealSection({
     children,
@@ -154,8 +150,8 @@ export default function WorksPage() {
                         Our <span className="gradient-text">Work</span>
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                        A selection of projects that showcase our range,
-                        technical depth, and real-world impact.
+                        A selection of products and engineering work that reflects our
+                        approach to thoughtful, scalable digital experiences.
                     </p>
                 </div>
             </section>
@@ -243,10 +239,16 @@ export default function WorksPage() {
                                         </div>
 
                                         <div className="flex gap-2 mt-5">
-                                            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                                                <Code2 className="w-3.5 h-3.5" />{" "}
-                                                Coreor.net - Development Partner
-                                            </button>
+                                            <a
+                                                href={p.href}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                                            >
+                                                <Code2 className="w-3.5 h-3.5" />
+                                                View repository
+                                                <ExternalLink className="w-3.5 h-3.5" />
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
