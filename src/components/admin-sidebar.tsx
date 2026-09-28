@@ -14,8 +14,7 @@ const links = [
   { href: "/admin/services", label: "Services", icon: Boxes },
   { href: "/admin/settings", label: "Settings", icon: Settings },
   { href: "/admin/access", label: "Access Control", icon: Shield },
-]
-
+] as const
 export function AdminSidebar() {
   const pathname = usePathname()
 

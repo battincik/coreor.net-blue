@@ -3,7 +3,7 @@ import { absoluteUrl, buildBreadcrumbJsonLd, buildWebPageJsonLd } from "@/lib/se
 export default function Head() {
   const title = "Works | Coreor Case Studies"
   const description =
-    "Review selected Coreor case studies across web, AI, cloud, and product engineering projects with measurable outcomes."
+    "Explore selected Coreor products and engineering work across data, desktop software, commerce and customer workflows."
   const path = "/works"
 
   const webPageJsonLd = buildWebPageJsonLd({
