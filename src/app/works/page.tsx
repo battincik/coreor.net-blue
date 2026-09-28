@@ -6,7 +6,6 @@ import {
     Blocks,
     Braces,
     Code as Code2,
-    Cpu,
     Database,
     ExternalLink,
     Globe,
