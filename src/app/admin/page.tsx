@@ -14,8 +14,7 @@ const shortcuts = [
   { href: "/admin/contact", label: "Open Contact Messages" },
   { href: "/admin/blog", label: "Manage Blog" },
   { href: "/admin/works", label: "Review Works" },
-]
-
+] as const
 export default function AdminIndexPage() {
   return (
     <section className="space-y-6">
