@@ -15,85 +15,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing OAuth environment variables" }, { status: 500 })
   }
 
-  const tokenCandidates = [
-    process.env.COREOR_OAUTH_TOKEN_URL,
-    `${apiBase}/v2/oauth2/token`,
-    `${apiBase}/oauth2/token`,
-    "https://api.coreor.net/oauth2/token",
-  ].filter((value, index, arr): value is string => Boolean(value) && arr.indexOf(value) === index)
+  const endpoint = process.env.COREOR_OAUTH_TOKEN_URL || `${apiBase}/oauth2/token`
+  const refreshRes = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+    cache: "no-store",
+  })
 
-  let refreshData: any = null
-  let refreshError: Record<string, unknown> | null = null
+  const contentType = refreshRes.headers.get("content-type") || ""
+  const rawBody = await refreshRes.text()
+  if (!contentType.includes("application/json")) {
+    return NextResponse.json({
+      error: "Token endpoint returned non-JSON response",
+      status: refreshRes.status,
+      endpoint,
+      contentType,
+      responsePreview: rawBody.slice(0, 300),
+    }, { status: 502 })
+  }
 
-  for (const endpoint of tokenCandidates) {
-    const refreshRes = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        grant_type: "refresh_token",
-        refresh_token: refreshToken,
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
-      cache: "no-store",
-    })
-
-    const contentType = refreshRes.headers.get("content-type") || ""
-    const rawBody = await refreshRes.text()
-
-    if (!contentType.includes("application/json")) {
-      refreshError = {
-        error: "Token endpoint returned non-JSON response",
-        status: refreshRes.status,
-        endpoint,
-        contentType,
-        responsePreview: rawBody.slice(0, 300),
-      }
-      if (refreshRes.status === 404) continue
-      return NextResponse.json(refreshError, { status: 502 })
-    }
-
-    let parsed: any = null
-    try {
-      parsed = JSON.parse(rawBody)
-    } catch {
-      refreshError = {
-        error: "Token endpoint returned invalid JSON",
-        status: refreshRes.status,
-        endpoint,
-        responsePreview: rawBody.slice(0, 300),
-      }
-      if (refreshRes.status === 404) continue
-      return NextResponse.json(refreshError, { status: 502 })
-    }
-
-    if (parsed?.status === "success" && parsed?.access_token) {
-      refreshData = parsed
-      break
-    }
-
-    refreshError = {
-      error: parsed?.message || "Refresh failed",
+  let refreshData: any
+  try {
+    refreshData = JSON.parse(rawBody)
+  } catch {
+    return NextResponse.json({
+      error: "Token endpoint returned invalid JSON",
       status: refreshRes.status,
       endpoint,
       responsePreview: rawBody.slice(0, 300),
-    }
-
-    if (refreshRes.status === 404) continue
-    return NextResponse.json(refreshError, { status: 401 })
+    }, { status: 502 })
   }
 
-  if (!refreshData) {
-    return NextResponse.json(
-      refreshError || {
-        error: "Refresh failed on all known endpoints",
-        triedEndpoints: tokenCandidates,
-      },
-      { status: 502 },
-    )
-  }
-
-  if (refreshData.status !== "success" || !refreshData.access_token) {
+  if (!refreshRes.ok || refreshData.status !== "success" || !refreshData.access_token) {
     return NextResponse.json({ error: refreshData.message || "Refresh failed" }, { status: 401 })
   }
 
@@ -106,7 +65,7 @@ export async function POST(req: NextRequest) {
   }
 
   response.cookies.set("coreor_access_token", refreshData.access_token, cookieOptions)
-  response.cookies.set("coreor_refresh_token", refreshData.refresh_token, cookieOptions)
+  if (refreshData.refresh_token) response.cookies.set("coreor_refresh_token", refreshData.refresh_token, cookieOptions)
 
   return response
 }
