@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing OAuth environment variables" }, { status: 500 })
   }
 
-  const authorizeRes = await fetch(`${apiBase}/v2/oauth2/authorize`, {
+  const authorizeRes = await fetch(`${apiBase}/oauth2/authorize`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

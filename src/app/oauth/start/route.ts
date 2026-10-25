@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing OAuth environment variables" }, { status: 500 })
   }
 
-  const checkRes = await fetch(`${apiBase}/v2/oauth2/check-authorization`, {
+  const checkRes = await fetch(`${apiBase}/oauth2/check-authorization`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
   const checkData = await checkRes.json()
 
   if (checkData.status === "success" && checkData.authorized === true) {
-    const authorizeRes = await fetch(`${apiBase}/v2/oauth2/authorize`, {
+    const authorizeRes = await fetch(`${apiBase}/oauth2/authorize`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
