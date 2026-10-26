@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import type { ReactNode } from "react"
 import type { Metadata } from "next"
 import { buildSiteMetadata } from "@/lib/seo"
+import { getCoreorAdminSession } from "@/lib/coreor-auth"
 import { AdminHeader } from "@/components/admin-header"
 import { AdminSidebar } from "@/components/admin-sidebar"
 
@@ -26,29 +27,13 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     redirect("/login?next=/admin/contact")
   }
 
-  const apiBase = process.env.COREOR_API_BASE
+  const session = await getCoreorAdminSession(accessToken)
 
-  if (!apiBase) {
-    redirect("/403")
-  }
-
-  const userRes = await fetch(`${apiBase}/v1/users/token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ token: accessToken }),
-    cache: "no-store",
-  })
-
-  const userJson = await userRes.json().catch(() => null)
-  const permissions = Array.isArray(userJson?.data?.permissions) ? userJson.data.permissions : []
-
-  if (userJson?.status !== "success") {
+  if (session.status === "unauthenticated") {
     redirect("/login?next=/admin/contact")
   }
 
-  if (!permissions.includes("*")) {
+  if (session.status !== "authorized") {
     redirect("/403")
   }
 

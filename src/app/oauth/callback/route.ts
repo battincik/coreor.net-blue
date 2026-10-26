@@ -1,101 +1,92 @@
 import { NextRequest, NextResponse } from "next/server"
+import {
+  getCoreorAdminSession,
+  getCoreorTokenUrl,
+  sanitizeNextPath,
+} from "@/lib/coreor-auth"
+
+type TokenResponse = {
+  status?: string
+  access_token?: string
+  refresh_token?: string
+  expires_in?: number
+  message?: string
+}
+
+function clearOAuthCookies(response: NextResponse) {
+  response.cookies.delete("coreor_oauth_state")
+  response.cookies.delete("coreor_oauth_next")
+  response.cookies.delete("coreor_user_token")
+  return response
+}
+
+function oauthError(req: NextRequest, reason: string) {
+  return clearOAuthCookies(
+    NextResponse.redirect(new URL(`/403?reason=${encodeURIComponent(reason)}`, req.url)),
+  )
+}
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code")
-  const nextPath = req.cookies.get("coreor_oauth_next")?.value || "/admin/contact"
-
-  if (!code) {
-    return NextResponse.json({ error: "Missing code" }, { status: 400 })
-  }
-
-  const apiBase = process.env.COREOR_API_BASE
+  const state = req.nextUrl.searchParams.get("state")
+  const expectedState = req.cookies.get("coreor_oauth_state")?.value
+  const nextPath = sanitizeNextPath(req.cookies.get("coreor_oauth_next")?.value)
   const clientId = process.env.COREOR_OAUTH_CLIENT_ID
   const clientSecret = process.env.COREOR_OAUTH_CLIENT_SECRET
   const redirectUri = process.env.COREOR_OAUTH_REDIRECT_URI
 
-  if (!apiBase || !clientId || !clientSecret || !redirectUri) {
-    return NextResponse.json({ error: "Missing OAuth environment variables" }, { status: 500 })
+  if (!code || !state || !expectedState || state !== expectedState) {
+    return oauthError(req, "invalid_oauth_state")
   }
 
-  const tokenEndpoint = process.env.COREOR_OAUTH_TOKEN_URL || `${apiBase}/oauth2/token`
-  const tokenRes = await fetch(tokenEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      grant_type: "authorization_code",
-      code,
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
-    }),
-    cache: "no-store",
-  })
-
-  const contentType = tokenRes.headers.get("content-type") || ""
-  const rawBody = await tokenRes.text()
-  if (!contentType.includes("application/json")) {
-    return NextResponse.json({
-      error: "Token endpoint returned non-JSON response",
-      status: tokenRes.status,
-      endpoint: tokenEndpoint,
-      contentType,
-      responsePreview: rawBody.slice(0, 300),
-    }, { status: 502 })
+  if (!clientId || !clientSecret || !redirectUri) {
+    return oauthError(req, "oauth_not_configured")
   }
 
-  let tokenData: any
+  let tokenResponse: Response
+
   try {
-    tokenData = JSON.parse(rawBody)
+    tokenResponse = await fetch(getCoreorTokenUrl(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        grant_type: "authorization_code",
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+      }),
+      cache: "no-store",
+    })
   } catch {
-    return NextResponse.json({
-      error: "Token endpoint returned invalid JSON",
-      status: tokenRes.status,
-      endpoint: tokenEndpoint,
-      responsePreview: rawBody.slice(0, 300),
-    }, { status: 502 })
+    return oauthError(req, "token_exchange_unavailable")
   }
 
-  if (!tokenRes.ok || tokenData.status !== "success" || !tokenData.access_token) {
-    return NextResponse.json({ error: tokenData.message || "Token exchange failed" }, { status: 400 })
+  const tokenData = (await tokenResponse.json().catch(() => null)) as TokenResponse | null
+
+  if (
+    !tokenResponse.ok ||
+    tokenData?.status !== "success" ||
+    !tokenData.access_token
+  ) {
+    return oauthError(req, "token_exchange_failed")
   }
 
-  const authCheckEndpoint = `${apiBase}/oauth2/check-authorization`
-  const authCheckRes = await fetch(authCheckEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${tokenData.access_token}`,
-    },
-    body: JSON.stringify({ client_id: clientId }),
-    cache: "no-store",
-  })
+  const session = await getCoreorAdminSession(tokenData.access_token)
 
-  const authCheckType = authCheckRes.headers.get("content-type") || ""
-  const authCheckRaw = await authCheckRes.text()
-  if (!authCheckType.includes("application/json")) {
-    return NextResponse.json({
-      error: "Authorization check returned non-JSON response",
-      status: authCheckRes.status,
-      endpoint: authCheckEndpoint,
-      contentType: authCheckType,
-      responsePreview: authCheckRaw.slice(0, 300),
-    }, { status: 502 })
+  if (session.status === "forbidden") {
+    return oauthError(req, "missing_wildcard_permission")
   }
 
-  let authCheckData: any
-  try {
-    authCheckData = JSON.parse(authCheckRaw)
-  } catch {
-    return NextResponse.json({
-      error: "Authorization check returned invalid JSON",
-      status: authCheckRes.status,
-      endpoint: authCheckEndpoint,
-      responsePreview: authCheckRaw.slice(0, 300),
-    }, { status: 502 })
+  if (session.status === "unauthenticated") {
+    return oauthError(req, "identity_verification_failed")
   }
 
-  if (authCheckData.status !== "success" || authCheckData.authorized !== true) {
-    return NextResponse.json({ error: authCheckData.message || "Authorization verification failed" }, { status: 401 })
+  if (session.status === "error") {
+    return oauthError(req, "authorization_unavailable")
   }
 
   const response = NextResponse.redirect(new URL(nextPath, req.url))
@@ -105,11 +96,20 @@ export async function GET(req: NextRequest) {
     sameSite: "lax" as const,
     path: "/",
   }
+  const expiresIn = Number(tokenData.expires_in)
+  const accessMaxAge = Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn : 2592000
 
-  response.cookies.set("coreor_access_token", tokenData.access_token, cookieOptions)
-  if (tokenData.refresh_token) response.cookies.set("coreor_refresh_token", tokenData.refresh_token, cookieOptions)
-  response.cookies.delete("coreor_oauth_state")
-  response.cookies.delete("coreor_oauth_next")
+  response.cookies.set("coreor_access_token", tokenData.access_token, {
+    ...cookieOptions,
+    maxAge: accessMaxAge,
+  })
 
-  return response
+  if (tokenData.refresh_token) {
+    response.cookies.set("coreor_refresh_token", tokenData.refresh_token, {
+      ...cookieOptions,
+      maxAge: 2592000,
+    })
+  }
+
+  return clearOAuthCookies(response)
 }
